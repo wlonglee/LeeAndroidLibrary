@@ -1,4 +1,4 @@
-package com.lee.android.gl
+package com.lee.android.lib.gl
 
 import android.content.Context
 import android.opengl.GLES20
@@ -76,7 +76,7 @@ abstract class BaseRenderer(var context: Context?) : GLSurfaceView.Renderer {
     }
 
     open fun onSizeChange(width: Int, height: Int) {
-        GLES20.glViewport(0, 0, 960, 640)
+        GLES20.glViewport(0, 0, width, height)
     }
 
     /**

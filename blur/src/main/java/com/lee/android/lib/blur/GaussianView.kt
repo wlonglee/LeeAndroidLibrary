@@ -1,10 +1,9 @@
-package com.lee.android.blur
+package com.lee.android.lib.blur
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
-import com.lee.android.blur.GaussianRender
 
 /**
  * 高斯模糊
@@ -20,7 +19,8 @@ class GaussianView(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             //设置GL版本
             setEGLContextClientVersion(2)
             //设置渲染器
-            gaussianRender = GaussianRender(context, bitmap)
+            gaussianRender =
+                GaussianRender(context, bitmap)
             setRenderer(gaussianRender)
             renderMode = RENDERMODE_WHEN_DIRTY
         } else {
