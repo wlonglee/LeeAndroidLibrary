@@ -1,11 +1,11 @@
-package com.lee.android.lib.blur
+package com.lee.android.blur
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLES20
 import com.lee.android.R
-import com.lee.android.lib.gl.BaseRenderer
-import com.lee.android.lib.gl.ShaderUtil
+import com.lee.android.gl.BaseRenderer
+import com.lee.android.gl.ShaderUtil
 
 
 /**

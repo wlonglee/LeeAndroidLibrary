@@ -1,9 +1,10 @@
-package com.lee.android.lib.blur
+package com.lee.android.blur
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
+import com.lee.android.blur.GaussianRender
 
 /**
  * 高斯模糊

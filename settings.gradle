@@ -1,2 +1,3 @@
+include ':blur'
 include ':app'
 rootProject.name = "LeeAndroidLibrary"
