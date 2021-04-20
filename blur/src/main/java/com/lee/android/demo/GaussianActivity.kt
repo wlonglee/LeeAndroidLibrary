@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.activity_gaussian.*
  *@author lee
  *@date 2021/4/20
  */
-class GaussianActivity : AppCompatActivity() {
+class GaussianDemo : AppCompatActivity() {
 
     private var change = false
 
