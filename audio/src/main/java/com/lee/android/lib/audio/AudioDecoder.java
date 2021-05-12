@@ -1,4 +1,4 @@
-package com.lee.android.lib;
+package com.lee.android.lib.audio;
 
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioFormat;
