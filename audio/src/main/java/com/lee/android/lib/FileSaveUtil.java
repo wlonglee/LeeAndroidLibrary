@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
  * 针对同一个文件写入和读取可同步进行,场景参照--->音频缓存,边下载进行缓存边播放
  *
  * @author lee
+ *
  * @date 2021/5/12
  */
 public class FileSaveUtil {
