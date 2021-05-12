@@ -19,7 +19,6 @@ public class AudioTrackRecordUtil {
      */
     private static AudioLeeTrack audioLeeTrack;
 
-
     /**
      * 录音
      */
@@ -30,7 +29,7 @@ public class AudioTrackRecordUtil {
      * 创建一个声音播放器
      *
      * @param sampleRate   采样率
-     * @param pcmEncodeBit 采样位数
+     * @param pcmEncodeBit 采样位数  AudioFormat.ENCODING_PCM_16BIT/AudioFormat.ENCODING_PCM_8BIT
      * @param channel      通道数 1单声道 2双声道
      */
     public static void createAudioTrack(int sampleRate, int pcmEncodeBit, int channel) {
@@ -72,16 +71,23 @@ public class AudioTrackRecordUtil {
         }
     }
 
+    /**
+     * 创建单声道录音
+     *
+     * @param sampleRate   采样率
+     * @param pcmEncodeBit 位数, AudioFormat.ENCODING_PCM_16BIT/AudioFormat.ENCODING_PCM_8BIT
+     * @param listener     监听器
+     */
     public static void createAudioRecord(int sampleRate, int pcmEncodeBit, RecordListener listener) {
         createAudioRecord(sampleRate, AudioFormat.CHANNEL_IN_MONO, pcmEncodeBit, listener);
     }
 
     /**
-     * 创建录音
+     * 创建双声道录音
      *
      * @param sampleRate   采样率
-     * @param pcmEncodeBit 位数
      * @param channel      单声道1 双声道 2
+     * @param pcmEncodeBit 位数, AudioFormat.ENCODING_PCM_16BIT/AudioFormat.ENCODING_PCM_8BIT
      * @param listener     录音回调
      */
     public static void createAudioRecord(int sampleRate, int channel, int pcmEncodeBit, RecordListener listener) {
@@ -131,13 +137,14 @@ public class AudioTrackRecordUtil {
     public interface RecordListener {
         /**
          * 录音数据
-         * @param data  pcm数据
-         * @param size  数据大小
+         *
+         * @param data pcm数据
+         * @param size 数据大小
          */
         void recordOfByte(byte[] data, int size);
 
         /**
-         * 录音结束
+         * 录音结束,调用stopRecord后触发
          */
         void recordEnd();
     }

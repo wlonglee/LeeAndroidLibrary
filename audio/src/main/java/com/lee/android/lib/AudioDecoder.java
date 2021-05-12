@@ -18,7 +18,6 @@ import static android.media.MediaCodec.BUFFER_FLAG_END_OF_STREAM;
 
 /**
  * 解码音频文件,提取pcm流
- * 超过双声道的音频数据会被转换为双声道
  *
  * @author lee by 2020/8/13
  */
@@ -46,7 +45,7 @@ public class AudioDecoder {
          *
          * @param sample   采样率
          * @param pcm      pcm位数
-         * @param channels 音频通道数,该值被限定为1或2,多于2声道的数据会被转换,具体请查看调用
+         * @param channels 音频通道数
          */
         void onPrepare(int sample, int pcm, int channels);
 
@@ -114,7 +113,7 @@ public class AudioDecoder {
     /**
      * pcm位数
      */
-    private int pcm;
+    private int pcmBit;
 
     /**
      * 解码线程
@@ -138,11 +137,12 @@ public class AudioDecoder {
 
     /**
      * 是否自动启动解码线程
+     * 为true,在setAudioPath后就会自行解码，所以记得在setAudioPath之前设置listener
      */
     private final boolean isAuto;
 
     /**
-     * 数据长度
+     * 数据长度,单位毫秒值
      */
     private long duration = 1;
 
@@ -162,6 +162,10 @@ public class AudioDecoder {
         this(false);
     }
 
+    /**
+     * 设置监听,isAuto为true的时候,需要在setAudioPath之前调用
+     * @param listener
+     */
     public void setListener(AudioListener listener) {
         this.listener = listener;
     }
@@ -287,9 +291,9 @@ public class AudioDecoder {
 
         if (format.containsKey(MediaFormat.KEY_PCM_ENCODING)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                pcm = format.getInteger(MediaFormat.KEY_PCM_ENCODING);
+                pcmBit = format.getInteger(MediaFormat.KEY_PCM_ENCODING);
             } else {
-                pcm = AudioFormat.ENCODING_PCM_16BIT;
+                pcmBit = AudioFormat.ENCODING_PCM_16BIT;
             }
         }
 
@@ -306,11 +310,7 @@ public class AudioDecoder {
             bufferInfo = new MediaCodec.BufferInfo();
             decoderTask = new DecoderThread();
             if (listener != null) {
-                if (channels > 2) {
-                    listener.onPrepare(sample, pcm, 2);
-                } else {
-                    listener.onPrepare(sample, pcm, 1);
-                }
+                listener.onPrepare(sample, pcmBit, channels);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -547,15 +547,7 @@ public class AudioDecoder {
             byte[] chunk = new byte[bufferInfo.size];
             buffer.get(chunk);
             buffer.clear();
-
-
-            if (channels <= 2)
-                //直接返回
-                onAudioData(chunk);
-            else {
-                //音频超过2声道的转码为2声道
-                onAudioData(AudioUtil.channel2(chunk, channels));
-            }
+            onAudioData(chunk);
             //释放缓冲区
             codec.releaseOutputBuffer(index, false);
         }
