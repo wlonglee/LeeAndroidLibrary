@@ -19,21 +19,21 @@ public abstract class AudioMixer {
     }
 
     /**
-     * 极值合成器
+     * 极值合成器,将音轨数据完全重合混在一起
      */
     public static AudioMixer createExtremeMixer() {
         return new ExtremeMixer();
     }
 
     /**
-     * 叠加合成器,需要考虑爆音的问题
+     * 叠加合成器,需要考虑爆音的问题,各个音轨数据直接叠加
      */
     public static AudioMixer createAddAudioMixer() {
         return new AddAudioMixer();
     }
 
     /**
-     * 完全平均值合成器
+     * 完全平均值合成器,各个音轨的数据将叠加后取平均值
      */
     public static AudioMixer createAverageAudioMixer() {
         return new AverageAudioMixer();
@@ -41,6 +41,8 @@ public abstract class AudioMixer {
 
     /**
      * 权值合成器
+     *
+     * @param weights {0.1,0.2,0.7}  权值数组长度为混合音轨的数量
      */
     public static AudioMixer createWeightAudioMixer(float[] weights) {
         return new WeightAudioMixer(weights);

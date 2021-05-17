@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.lee.android.R
-import com.lee.android.lib.FileSaveUtil
-import com.lee.android.lib.audio.AudioMixer
-import com.lee.android.lib.audio.AudioUtil
+import com.lee.audio.lib.FileSaveUtil
+import com.lee.audio.lib.audio.AudioMixer
+import com.lee.audio.lib.audio.AudioUtil
 
 class AudioActivity : AppCompatActivity() {
 
