@@ -11,6 +11,9 @@ buildscript {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+//        # 取消代理
+//        git config --global --unset http.proxy
+//        git config --global --unset https.proxy
     }
 }
 
