@@ -12,10 +12,10 @@ public abstract class AudioMixer {
     public static final String TAG = "AudioMixer";
 
     /**
-     * 叠加合成器,多轨音频会有爆音的问题
+     * 默认创建一个极值合成器
      */
-    public static AudioMixer createAddAudioMixer() {
-        return new AddAudioMixer();
+    public static AudioMixer createDefaultAudioMixer() {
+        return createExtremeMixer();
     }
 
     /**
@@ -26,7 +26,14 @@ public abstract class AudioMixer {
     }
 
     /**
-     * 平均值合成器
+     * 叠加合成器,需要考虑爆音的问题
+     */
+    public static AudioMixer createAddAudioMixer() {
+        return new AddAudioMixer();
+    }
+
+    /**
+     * 完全平均值合成器
      */
     public static AudioMixer createAverageAudioMixer() {
         return new AverageAudioMixer();
