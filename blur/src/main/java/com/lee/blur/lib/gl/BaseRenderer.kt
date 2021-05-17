@@ -1,4 +1,4 @@
-package com.lee.android.lib.gl
+package com.lee.blur.lib.gl
 
 import android.content.Context
 import android.opengl.GLES20

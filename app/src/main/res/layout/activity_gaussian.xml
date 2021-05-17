@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.lee.android.lib.blur.GaussianView
+    <com.lee.blur.lib.blur.GaussianView
         android:id="@+id/gaussianView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

@@ -1,10 +1,10 @@
-package com.lee.android.demo
+package com.lee.blur.demo
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import com.lee.android.R
+import com.lee.blur.R
 import kotlinx.android.synthetic.main.activity_gaussian.*
 
 /**

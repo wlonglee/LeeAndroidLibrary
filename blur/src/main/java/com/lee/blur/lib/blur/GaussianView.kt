@@ -1,4 +1,4 @@
-package com.lee.android.lib.blur
+package com.lee.blur.lib.blur
 
 import android.content.Context
 import android.graphics.Bitmap
