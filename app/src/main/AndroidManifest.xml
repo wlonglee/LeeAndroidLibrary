@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LeeAndroidLibrary.NoActionBar">
 
-        <activity android:name=".demo.audio.AudioActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
