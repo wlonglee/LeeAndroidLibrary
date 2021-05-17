@@ -18,7 +18,7 @@ public class FileSaveUtil {
     /**
      * 存储根目录
      */
-    public static String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/LavaMusic/";
+    public static String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Pictures/";
 
     /**
      * 文件流操作
@@ -41,7 +41,7 @@ public class FileSaveUtil {
      * @param needDel   文件已存在的情况下是否删除
      */
     public FileSaveUtil(String name, String customDir, boolean needDel) {
-        this(name, customDir, ".pcm", 0, needDel, false);
+        this(name, customDir, "pcm", 0, needDel, false);
     }
 
     /**
@@ -114,8 +114,8 @@ public class FileSaveUtil {
      * @param name      文件名
      * @param customDir 目录名
      */
-    private FileSaveUtil(String name, String customDir) {
-        this(name, customDir, ".pcm");
+    public FileSaveUtil(String name, String customDir) {
+        this(name, customDir, "pcm");
     }
 
     /**
@@ -125,7 +125,7 @@ public class FileSaveUtil {
      * @param customDir 目录名
      * @param suffix    文件后缀
      */
-    private FileSaveUtil(String name, String customDir, String suffix) {
+    public FileSaveUtil(String name, String customDir, String suffix) {
         File dir = new File(path + customDir);
         File file = new File(dir.getPath(), name + "." + suffix);
         filePath = file.getPath();
