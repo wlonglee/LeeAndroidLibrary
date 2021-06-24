@@ -524,6 +524,8 @@ public class AudioDecoder {
                     onProgress(((int) (pts * 1f / duration * 10000)) / 100f);
                 }
 
+                render(index);
+
                 //渲染结束
                 int flag = bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM;
                 if (flag != 0) {
