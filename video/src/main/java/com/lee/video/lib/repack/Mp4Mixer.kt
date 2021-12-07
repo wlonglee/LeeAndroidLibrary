@@ -3,6 +3,7 @@ package com.lee.video.lib.repack
 import android.media.MediaCodec
 import android.media.MediaFormat
 import android.media.MediaMuxer
+import android.util.Log
 import java.nio.ByteBuffer
 
 /**
@@ -104,6 +105,8 @@ class Mp4Mixer(outPath: String) {
         if (!start) {
             return
         }
+        if(bufferInfo.presentationTimeUs==0L)
+            return
         mixer.writeSampleData(videoTrackIndex, byteBuffer, bufferInfo)
     }
 
