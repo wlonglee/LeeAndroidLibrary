@@ -1,0 +1,39 @@
+#ifdef GL_ES
+precision mediump float;
+#endif
+uniform sampler2D uTexture;
+varying vec2 texturePos;
+uniform float size;
+//高斯模糊
+vec4 blur(vec2 uv,vec2 offset){
+    // 左上
+    vec4 color = texture2D(uTexture, vec2(uv.x - offset.x,uv.y - offset.y)) * 0.0947416;
+    // 上
+    color += texture2D(uTexture,vec2(uv.x,uv.y - offset.y)) * 0.118318;
+    // 右上
+    color += texture2D(uTexture,vec2(uv.x + offset.x,uv.y + offset.y)) * 0.0947416;
+    // 左
+    color += texture2D(uTexture,vec2(uv.x - offset.x,uv.y)) * 0.118318;
+    // 中
+    color += texture2D(uTexture,vec2(uv.x,uv.y)) * 0.147761;
+    // 右
+    color += texture2D(uTexture,vec2(uv.x + offset.x,uv.y)) * 0.118318;
+    // 左下
+    color += texture2D(uTexture, vec2(uv.x - offset.x,uv.y + offset.y)) * 0.0947416;
+    // 下
+    color += texture2D(uTexture,vec2(uv.x,uv.y + offset.y)) * 0.118318;
+    // 右下
+    color += texture2D(uTexture,vec2(uv.x + offset.x,uv.y - offset.y)) * 0.0947416;
+    return color;
+}
+
+void main() {
+    //高斯模糊
+    vec2 offset =vec2(1./960.,1./640.)*size;
+
+    vec2 uv=texturePos;
+
+    vec4 color= blur(uv,offset);
+
+    gl_FragColor= vec4(color.rgb,texture2D(uTexture,uv).a);
+}
