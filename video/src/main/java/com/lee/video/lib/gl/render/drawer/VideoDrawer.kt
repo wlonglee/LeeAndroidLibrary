@@ -80,14 +80,14 @@ class VideoDrawer(context: Context, var callBack: (st: SurfaceTexture) -> Unit) 
      * 设定视频的宽和高
      */
     override fun setSize(width: Int, height: Int) {
-        Log.e("lee", "视频大小: $width*$height")
+//        Log.e("lee", "视频大小: $width*$height")
         videoWidth = width
         videoHeight = height
         initMatrix()
     }
 
     override fun onWordSize(width: Int, height: Int) {
-        Log.e("lee", "视图大小: $width*$height")
+//        Log.e("lee", "视图大小: $width*$height")
         worldWidth = width
         worldHeight = height
         initMatrix()
@@ -151,7 +151,7 @@ class VideoDrawer(context: Context, var callBack: (st: SurfaceTexture) -> Unit) 
                 }
             }
 
-            Log.e("lee","matrix:${widthRatio},${heightRatio}")
+//            Log.e("lee","matrix:${widthRatio},${heightRatio}")
             //设置相机位置
             val viewMatrix = FloatArray(16)
             Matrix.setLookAtM(

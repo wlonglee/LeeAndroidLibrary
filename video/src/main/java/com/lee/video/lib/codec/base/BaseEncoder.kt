@@ -122,7 +122,7 @@ abstract class BaseEncoder {
      * 停止编码器
      */
     fun stopEncoder() {
-        Log.e("lee", "停止了编码器:${frameQueue.size}")
+//        Log.e("lee", "停止了编码器:${frameQueue.size}")
     }
 
 
@@ -145,7 +145,7 @@ abstract class BaseEncoder {
                 }
                 if (isVideo()) {
                     if (frame.buffer == null) {
-                        Log.e("lee", "视频结束标志")
+//                        Log.e("lee", "视频结束标志")
                         codec?.signalEndOfInputStream()
                         break
                     }
@@ -156,7 +156,7 @@ abstract class BaseEncoder {
                     }
                     val inputBuffer = codec?.getInputBuffer(index) ?: continue
                     if (frame.buffer == null) {
-                        Log.e("lee", "音频结束标志")
+//                        Log.e("lee", "音频结束标志")
                         codec?.queueInputBuffer(
                             index,
                             0,
@@ -195,7 +195,7 @@ abstract class BaseEncoder {
                 //结束标志
                 val flag = bufferInfo.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM
                 if (flag != 0) {
-                    Log.e("lee", "终止任务")
+//                    Log.e("lee", "终止任务")
                     codec!!.releaseOutputBuffer(index, false)
                     break
                 }
@@ -236,7 +236,7 @@ abstract class BaseEncoder {
 
 
     private fun goEnd() {
-        Log.e("lee", "ros:$ros,$dos")
+//        Log.e("lee", "ros:$ros,$dos")
         if (dos && ros) {
             codec?.stop()
             codec?.release()

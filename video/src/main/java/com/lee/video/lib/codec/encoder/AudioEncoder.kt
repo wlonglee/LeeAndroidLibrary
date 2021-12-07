@@ -210,7 +210,7 @@ class AudioEncoder private constructor() {
         }
         if(!isRun){
             isRun=true
-            Log.e("lee","启动音频编码")
+//            Log.e("lee","启动音频编码")
             pool.execute(coderTask)
             pool.execute(encoderTask)
         }
@@ -222,7 +222,7 @@ class AudioEncoder private constructor() {
     fun stopEncoder() {
         //压入一个空数据
         encoder(FrameObject())
-        Log.e("lee", "停止了音频编码器,剩余待处理数据:${frameQueue.size}")
+//        Log.e("lee", "停止了音频编码器,剩余待处理数据:${frameQueue.size}")
     }
 
     /**
@@ -247,7 +247,7 @@ class AudioEncoder private constructor() {
                 }
                 val inputBuffer = codec?.getInputBuffer(index) ?: continue
                 if (frame.buffer == null) {
-                    Log.e("lee", "音频结束标志")
+//                    Log.e("lee", "音频结束标志")
                     codec?.queueInputBuffer(
                         index,
                         0,
@@ -305,7 +305,7 @@ class AudioEncoder private constructor() {
             codec?.stop()
             codec?.release()
             codec = null
-            Log.e("lee", "音频编码任务完成")
+//            Log.e("lee", "音频编码任务完成")
             listener?.onEnd()
         }
     }

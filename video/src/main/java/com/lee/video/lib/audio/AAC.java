@@ -353,7 +353,7 @@ public class AAC {
             return;
         }
         isStopTask = true;
-        Log.e("lee", "停止编码器:" + audioQueue.size());
+//        Log.e("lee", "停止编码器:" + audioQueue.size());
     }
 
 
@@ -545,7 +545,7 @@ public class AAC {
             return;
         }
         isStopTask = true;
-        Log.e("lee", "停止解码器:" + audioQueue.size());
+//        Log.e("lee", "停止解码器:" + audioQueue.size());
     }
 
     /**

@@ -3,11 +3,9 @@ package com.lee.video.lib.gl
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Rect
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import android.opengl.GLUtils
-import android.util.Log
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.ByteBuffer
@@ -82,7 +80,6 @@ object ShaderUtil {
 
         //编译失败
         if (vertex == -1 || fragment == -1) {
-            Log.e("lee", "gl compiled fail")
             throw RuntimeException("gl compiled fail")
         }
         //创建OpenGL ES程序，注意：需要在OpenGL渲染线程中创建，否则无法渲染
@@ -111,7 +108,6 @@ object ShaderUtil {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        Log.e("lee", builder.toString())
         return builder.toString()
     }
 
@@ -133,7 +129,6 @@ object ShaderUtil {
         GLES20.glGetShaderiv(glCreateShader, GLES20.GL_COMPILE_STATUS, compiled, 0)
         if (compiled[0] != GLES20.GL_TRUE) {
             //编译失败
-            Log.e("lee", GLES20.glGetShaderInfoLog(glCreateShader))
             GLES20.glDeleteShader(glCreateShader)
             return -1
         }
@@ -154,7 +149,6 @@ object ShaderUtil {
             //解析失败
             val info = GLES20.glGetProgramInfoLog(program)
             GLES20.glDeleteProgram(program)
-            Log.e("lee", "Could not link program: $info")
             throw RuntimeException("Could not link program: $info")
         }
     }
