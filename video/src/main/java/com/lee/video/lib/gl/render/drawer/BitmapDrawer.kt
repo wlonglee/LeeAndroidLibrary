@@ -13,7 +13,8 @@ import com.lee.video.lib.gl.ShaderUtil
  *@author lee
  *@date 2021/12/6
  */
-class BitmapDrawer(context: Context?, var bitmap: Bitmap) : BaseDrawer(context) {
+class BitmapDrawer(context: Context?, var bitmap: Bitmap) :
+    BaseDrawer(context) {
     /**
      * 纹理索引
      */
@@ -38,7 +39,6 @@ class BitmapDrawer(context: Context?, var bitmap: Bitmap) : BaseDrawer(context) 
     }
 
     override fun config() {
-        coordinateBuffer = ShaderUtil.generateCoordinateBuffer(512,512,256,256,52,256)
         change = false
         //加载图片为纹理
         textureId = ShaderUtil.loadTexture(bitmap)
@@ -47,44 +47,28 @@ class BitmapDrawer(context: Context?, var bitmap: Bitmap) : BaseDrawer(context) 
         ShaderUtil.bindTexture(0, textureId, texture)
     }
 
-    override fun useCustomRender(): Boolean {
-        return true
-    }
-
     override fun render() {
         if (change) {
             change = false
-
             textureId = ShaderUtil.loadTexture(bitmap)
             //绑定纹理
             ShaderUtil.bindTexture(0, textureId, texture)
         }
-
         //将最终的结果渲染显示
-        ShaderUtil.clearScreen()
-        ShaderUtil.useGL(glProgram, position, positionBuffer, coordinate, coordinateBuffer)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
-        ShaderUtil.drawGL(position, coordinate)
     }
 
     override fun release() {
         super.release()
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+        ShaderUtil.unBindTexture(0)
     }
-
-    override fun setSize(width: Int, height: Int) {
-    }
-
-    override fun translate(dx: Float, dy: Float) {
-    }
-
-    override fun getSurface(): SurfaceTexture? {
-        return null
-    }
-
 
     fun updateBitmap(bitmap: Bitmap) {
         this.bitmap = bitmap
         change = true
+    }
+
+    override fun useCustomWordSize(): Boolean {
+        return true
     }
 }

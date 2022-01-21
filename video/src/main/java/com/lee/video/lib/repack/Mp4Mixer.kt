@@ -105,8 +105,10 @@ class Mp4Mixer(outPath: String) {
         if (!start) {
             return
         }
-        if(bufferInfo.presentationTimeUs==0L)
-            return
+//        if(bufferInfo.presentationTimeUs==0L) {
+//            Log.e("lee","视频数据0")
+//            return
+//        }
         mixer.writeSampleData(videoTrackIndex, byteBuffer, bufferInfo)
     }
 

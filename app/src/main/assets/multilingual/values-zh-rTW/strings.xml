@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">调音器</string>
+    <string name="hand_pluck_manual">请选择要调的弦</string>
+    <string name="hand_pluck_auto">请拨动一根弦</string>
+    <string name="hand_pluck_check">拨 %s 弦</string>
+    <string name="cursor_low">拧紧点</string>
+    <string name="cursor_high">拧松点</string>
+    <string name="cursor_complete">完美</string>
+    <string name="tuner_model_select_title">特殊调弦模式</string>
+    <string name="cancel">关闭</string>
+    <string name="confirm">确认</string>
+    <string name="select">模式选择</string>
+    <string name="tx_low">低</string>
+    <string name="tx_high">高</string>
+    <string name="tuner_model_auto">自动</string>
+    <string name="tuner_model_Manual">手动</string>
+    <string name="tuner_model_standard">标准模式</string>
+    <string name="tuner_model_Chromatic">半音模式</string>
+    <string name="tuner_model_halfdown">标准降半音</string>
+    <string name="tuner_model_Dropd">降D调弦</string>
+    <string name="tuner_model_Dsus4">凯尔特调弦</string>
+    <string name="tuner_model_Open_D">开放 D 调弦</string>
+    <string name="tuner_model_Open_G">开放 G 调弦</string>
+    <string name="tuner_model_Open_E">开放 E 调弦</string>
+    <string name="gui_commit">完成</string>
+    <string name="gui_manual_notify">手动模式下\n先轻点琴弦按钮，再拨弦调音</string>
+    <string name="tuner_model_standard_description">E A D G B E</string>
+    <string name="tuner_model_chromatic_description">可识别所有半音</string>
+    <string name="tuner_model_halfdown_description">Eb Ab Db Gb Bb Eb</string>
+    <string name="tuner_model_Dropd_description">D A D G B E</string>
+    <string name="tuner_model_Dsus4_description">D A D G A D</string>
+    <string name="tuner_model_Open_D_description">D A D F# A D</string>
+    <string name="tuner_model_Open_G_description">D G D G B D</string>
+    <string name="tuner_model_Open_E_description">E B E G# B E</string>
+</resources>

@@ -62,9 +62,10 @@ object ShaderUtil {
      * 三角形绘制顺序,与纹理坐标挂钩
      * 0-1-2组成一个三角形
      * 1-2-3组成一个三角形
-     * 012/123这个是drawGL默认的绘制规则
+     * 012/123这个是drawGL默认的绘制规则 0123参考纹理坐标注释后边的值
      */
     private val drawOrder = shortArrayOf(0, 1, 2, 1, 2, 3)
+
 
     /**
      * 1.创建一个GL对象
@@ -88,52 +89,6 @@ object ShaderUtil {
         GLES20.glAttachShader(program, vertex)
         GLES20.glAttachShader(program, fragment)
         return program
-    }
-
-    /**
-     * 读取shader文件流
-     * @param resId 顶点或片元文件
-     */
-    private fun readShader(context: Context, resId: Int): String {
-        val builder = StringBuilder()
-        try {
-            val inputStream = context.resources.openRawResource(resId)
-            val streamReader = InputStreamReader(inputStream)
-            val bufferedReader = BufferedReader(streamReader)
-            var textLine: String?
-            while (bufferedReader.readLine().also { textLine = it } != null) {
-                builder.append(textLine)
-                builder.append("\n")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return builder.toString()
-    }
-
-    /**
-     * 加载shader
-     * @param glShader shader标识
-     * @param shader  shader文件
-     */
-    private fun loadShader(glShader: Int, shader: String): Int {
-        //创建
-        val glCreateShader = GLES20.glCreateShader(glShader)
-        //加载
-        GLES20.glShaderSource(glCreateShader, shader)
-        //编译
-        GLES20.glCompileShader(glCreateShader)
-
-        //编译结果
-        val compiled = IntArray(1)
-        GLES20.glGetShaderiv(glCreateShader, GLES20.GL_COMPILE_STATUS, compiled, 0)
-        if (compiled[0] != GLES20.GL_TRUE) {
-            //编译失败
-            GLES20.glDeleteShader(glCreateShader)
-            return -1
-        }
-        //返回
-        return glCreateShader
     }
 
     /**
@@ -162,7 +117,7 @@ object ShaderUtil {
     }
 
     /**
-     * 4.获取纹理属性
+     * 4.获取纹理坐标属性
      * @param program GL对象
      */
     fun getAttributeCoordinate(program: Int): Int {
@@ -191,7 +146,7 @@ object ShaderUtil {
     }
 
     /**
-     * 获取纹理数据,一次即可
+     * 获取纹理坐标数据,一次即可
      */
     fun generateCoordinateBuffer(): FloatBuffer {
         val coordinateBuffer = ByteBuffer.allocateDirect(coordinateData.size * 4) //一个float有4个字节
@@ -203,7 +158,7 @@ object ShaderUtil {
     }
 
     /**
-     * 获取纹理数据,一次即可,通过预设的裁剪区域 对显示区域进行裁剪后显示
+     * 获取纹理坐标数据,一次即可,通过预设的裁剪区域 对显示区域进行裁剪后显示
      * @param originalW 原始宽
      * @param originalH 原始高
      * @param clipW  裁剪的宽
@@ -238,6 +193,43 @@ object ShaderUtil {
         return coordinateBuffer
     }
 
+
+    /**
+     * 获取顶点数据,一次即可,通过预设的显示区域,可在指定区域内显示纹理
+     * @param originalW 原始宽
+     * @param originalH 原始高
+     * @param clipW  显示的宽
+     * @param clipH 显示的高
+     * @param marginLeft 显示区域距离左边的距离
+     * @param marginTop 显示区域距离顶部的距离
+     */
+    fun generatePositionBuffer(
+        originalW: Int,
+        originalH: Int,
+        clipW: Int,
+        clipH: Int,
+        marginLeft: Int,
+        marginTop: Int
+    ): FloatBuffer {
+        val dLeft = marginLeft * 1f / originalW
+        val dTop = marginTop * 1f / originalH
+        val dRight = (marginLeft + clipW) * 1f / originalW
+        val dBottom = (marginTop + clipH) * 1f / originalH
+        val positionData = floatArrayOf(
+            dLeft, dBottom,
+            dLeft, dTop,
+            dRight, dBottom,
+            dRight, dTop
+        )
+
+        val posBuffer = ByteBuffer.allocateDirect(positionData.size * 4) //一个float有4个字节
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+            .put(positionData)
+        posBuffer.position(0)
+        return posBuffer
+    }
+
     /**
      * 获取绘制数据,一次即可
      */
@@ -255,8 +247,8 @@ object ShaderUtil {
      * @param program GL对象
      * @param position 顶点
      * @param positionBuffer 顶点数据
-     * @param coordinate 纹理
-     * @param coordinateBuffer 纹理数据
+     * @param coordinate 纹理坐标
+     * @param coordinateBuffer 纹理坐标数据
      */
     fun useGL(
         program: Int,
@@ -267,10 +259,9 @@ object ShaderUtil {
     ) {
         //启用gl
         GLES20.glUseProgram(program)
-
-        //启用顶点
+        //启用顶点坐标
         GLES20.glEnableVertexAttribArray(position)
-        //顶点赋值
+        //顶点坐标赋值
         GLES20.glVertexAttribPointer(
             position,
             POS_PER_VERTEX,
@@ -280,9 +271,9 @@ object ShaderUtil {
             positionBuffer
         )
 
-        //启用纹理
+        //启用纹理坐标
         GLES20.glEnableVertexAttribArray(coordinate)
-        //纹理赋值
+        //纹理坐标赋值
         GLES20.glVertexAttribPointer(
             coordinate,
             COORDINATE_PER_VERTEX,
@@ -399,7 +390,7 @@ object ShaderUtil {
     }
 
     /**
-     * 5.2绑定根据颜色值生成的纹理
+     * 5.2绑定根据颜色值生成的纹理,可渲染yuv数据
      * @param offset 纹理编号 0~31
      * @param id 纹理索引
      * @param texture 纹理属性
@@ -439,7 +430,7 @@ object ShaderUtil {
 
 
     /**
-     * 5.2绑定扩展纹理,渲染视频
+     * 5.2绑定扩展纹理,用于渲染视频
      * @param offset 纹理编号 0~31
      * @param id 纹理索引
      * @param texture 纹理属性
@@ -462,9 +453,9 @@ object ShaderUtil {
         //绘制三角形
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, VERTEX_COUNT)
 
-        //禁用顶点
+        //禁用顶点坐标
         GLES20.glDisableVertexAttribArray(position)
-        //禁用纹理
+        //禁用纹理坐标
         GLES20.glDisableVertexAttribArray(coordinate)
     }
 
@@ -478,15 +469,14 @@ object ShaderUtil {
             GLES20.GL_UNSIGNED_SHORT,
             drawBuffer
         )
-
-        //禁用顶点
+        //禁用顶点坐标
         GLES20.glDisableVertexAttribArray(position)
-        //禁用纹理
+        //禁用纹理坐标
         GLES20.glDisableVertexAttribArray(coordinate)
     }
 
     /**
-     * 开启混合模式,这样透明度渐变过渡的效果才生效,否则有锯齿
+     * 开启混合模式,只有这样叠加绘制、透明度设置才会生效
      */
     fun enableAlpha() {
         // 开启混合模式
@@ -496,10 +486,16 @@ object ShaderUtil {
     }
 
     /**
+     * 清除颜色
+     */
+    fun clearColor() {
+        GLES20.glClearColor(0f, 0f, 0f, 0f)
+    }
+
+    /**
      * 清屏
      */
-    fun clearScreen() {
-        GLES20.glClearColor(0f, 0f, 0f, 0f)
+    fun cleanScreen() {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
     }
 
@@ -704,6 +700,91 @@ object ShaderUtil {
 
         //5.删除gl
         GLES20.glDeleteProgram(program)
+    }
+
+    /**
+     * 解绑纹理
+     */
+    fun unBindTexture(index: Int) {
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D + index, 0)
+    }
+
+    /**
+     * 清除纹理
+     */
+    fun delTexture(idSize: Int, id: IntArray) {
+        GLES20.glDeleteTextures(idSize, id, 0)
+    }
+
+    /**
+     * 删除gl
+     */
+    fun delGL(program: Int) {
+        GLES20.glDeleteProgram(program)
+    }
+
+    /**
+     * 设定GL显示区域
+     */
+    fun setWord(width: Int, height: Int) {
+        setWord(0, 0, width, height)
+    }
+
+    /**
+     * 设定GL显示区域
+     * @param x 距离左侧的距离
+     * @param y 距离底部的距离
+     * @param width 显示区域的宽
+     * @param height 显示区域的高
+     */
+    fun setWord(x: Int, y: Int, width: Int, height: Int) {
+        GLES20.glViewport(x, y, width, height)
+    }
+
+    /**
+     * 读取shader文件流
+     * @param resId 顶点或片元文件
+     */
+    private fun readShader(context: Context, resId: Int): String {
+        val builder = StringBuilder()
+        try {
+            val inputStream = context.resources.openRawResource(resId)
+            val streamReader = InputStreamReader(inputStream)
+            val bufferedReader = BufferedReader(streamReader)
+            var textLine: String?
+            while (bufferedReader.readLine().also { textLine = it } != null) {
+                builder.append(textLine)
+                builder.append("\n")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return builder.toString()
+    }
+
+    /**
+     * 加载shader
+     * @param glShader shader标识
+     * @param shader  shader文件
+     */
+    private fun loadShader(glShader: Int, shader: String): Int {
+        //创建
+        val glCreateShader = GLES20.glCreateShader(glShader)
+        //加载
+        GLES20.glShaderSource(glCreateShader, shader)
+        //编译
+        GLES20.glCompileShader(glCreateShader)
+
+        //编译结果
+        val compiled = IntArray(1)
+        GLES20.glGetShaderiv(glCreateShader, GLES20.GL_COMPILE_STATUS, compiled, 0)
+        if (compiled[0] != GLES20.GL_TRUE) {
+            //编译失败
+            GLES20.glDeleteShader(glCreateShader)
+            return -1
+        }
+        //返回
+        return glCreateShader
     }
 
 }

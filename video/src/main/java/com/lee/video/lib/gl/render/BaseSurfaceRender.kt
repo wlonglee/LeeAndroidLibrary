@@ -1,7 +1,7 @@
 package com.lee.video.lib.gl.render
 
-import android.opengl.GLES20
 import android.opengl.GLSurfaceView
+import com.lee.video.lib.gl.ShaderUtil
 import com.lee.video.lib.gl.render.drawer.IDrawer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -15,11 +15,14 @@ import javax.microedition.khronos.opengles.GL10
  *@date 2021/11/23
  */
 class BaseSurfaceRender : GLSurfaceView.Renderer {
-
+    /**
+     * 绘制器列表,每个绘制器都可干自己的绘制流程,当编码输出的时候,可以将所有效果叠加在一起进行输出
+     */
     private val drawers = mutableListOf<IDrawer>()
 
     override fun onSurfaceCreated(gl: GL10, config: EGLConfig) {
-        GLES20.glClearColor(0f, 0f, 0f, 0f)
+        ShaderUtil.clearColor()
+        //配置数据
         drawers.forEach {
             it.onConfig()
         }
@@ -27,15 +30,19 @@ class BaseSurfaceRender : GLSurfaceView.Renderer {
 
 
     override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
-        GLES20.glViewport(0, 0, width, height)
+        //设定GL区域大小
         drawers.forEach {
-            it.onWordSize(width, height)
+            if (!it.useCustomWordSize())
+                it.onWordSize(width, height)
         }
     }
 
+    /**
+     * surface绘制
+     */
     override fun onDrawFrame(gl: GL10) {
         // 清屏，否则会有画面残留
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+        ShaderUtil.cleanScreen()
         drawers.forEach {
             it.onDrawFrame()
         }
@@ -49,6 +56,9 @@ class BaseSurfaceRender : GLSurfaceView.Renderer {
             drawers.add(drawer)
     }
 
+    /**
+     * 释放资源
+     */
     fun release() {
         for (drawer in drawers) {
             drawer.release()

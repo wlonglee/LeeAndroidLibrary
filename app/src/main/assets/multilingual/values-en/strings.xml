@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lava Tuner</string>
+    <string name="hand_pluck_manual">Tap the String Button</string>
+    <string name="hand_pluck_auto">Pluck a string</string>
+    <string name="hand_pluck_check">Pluck the %s string</string>
+    <string name="cursor_low">Tune up</string>
+    <string name="cursor_high">Tune down</string>
+    <string name="cursor_complete">Perfect</string>
+    <string name="tuner_model_select_title">Alternate Tunings</string>
+    <string name="cancel">Close</string>
+    <string name="confirm">Confirm</string>
+    <string name="select">Select Tuning</string>
+    <string name="tx_low">Low</string>
+    <string name="tx_high">High</string>
+    <string name="tuner_model_auto">Auto</string>
+    <string name="tuner_model_Manual">Manual</string>
+    <string name="tuner_model_standard">Standard</string>
+    <string name="tuner_model_Chromatic">Chromatic</string>
+    <string name="tuner_model_halfdown">Half step down</string>
+    <string name="tuner_model_Dropd">Drop D</string>
+    <string name="tuner_model_Dsus4">Dsus4</string>
+    <string name="tuner_model_Open_D">Open D</string>
+    <string name="tuner_model_Open_G">Open G</string>
+    <string name="tuner_model_Open_E">Open E</string>
+    <string name="gui_commit">Done</string>
+    <string name="gui_manual_notify">In manual mode, tap the specifc button before tuning.</string>
+    <string name="tuner_model_standard_description">E A D G B E</string>
+    <string name="tuner_model_chromatic_description">Recognize all semitones</string>
+    <string name="tuner_model_halfdown_description">Eb Ab Db Gb Bb Eb</string>
+    <string name="tuner_model_Dropd_description">D A D G B E</string>
+    <string name="tuner_model_Dsus4_description">D A D G A D</string>
+    <string name="tuner_model_Open_D_description">D A D F# A D</string>
+    <string name="tuner_model_Open_G_description">D G D G B D</string>
+    <string name="tuner_model_Open_E_description">E B E G# B E</string>
+</resources>

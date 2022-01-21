@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toast_layout_root"
+    android:layout_width="960px"
+    android:layout_height="640px"
+    android:background="#DAAA"
+    android:orientation="horizontal">
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="960px"
+        android:layout_height="640px"
+        android:gravity="center"
+        android:text="123456"/>
+</RelativeLayout>

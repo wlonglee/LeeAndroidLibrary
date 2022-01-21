@@ -12,7 +12,6 @@ import com.lee.video.lib.audio.AudioUtil
 import com.lee.video.lib.codec.base.BaseDecoder
 import java.io.FileDescriptor
 import java.io.IOException
-import java.nio.ByteBuffer
 
 /**
  * 音频信息解码-单独使用可作为音频播放器,支持几乎所有音频格式文件,可无缝循环
@@ -50,11 +49,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
         fun onAudioData(audioData: ByteArray)
 
         /**
-         * 自行处理音频数据,用于音频重编码,只有dealAudio为true的时候才会调用
-         */
-        fun onDealAudio(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo)
-
-        /**
          * 播放器停止,资源也已释放,如果再次使用需要重新构建对象
          */
         fun onEnd()
@@ -66,6 +60,9 @@ class AudioDecoder private constructor() : BaseDecoder() {
 
     }
 
+    /**
+     * 空实现
+     */
     open class SimpleListener : AudioListener {
         override fun onAudioFormat(sample: Int, pcmBit: Int, channel: Int, duration: Long) {
         }
@@ -84,10 +81,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
 
         override fun onError(msg: String) {
         }
-
-        override fun onDealAudio(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-
-        }
     }
 
     /**
@@ -96,12 +89,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
      * false 使用内置的audioTrack进行音频的播放,音频流不会给出
      */
     private var dealPcm = false
-
-    /**
-     * 是否自行处理解码后的原始数据
-     * true 音频解码产生的原始数据将通过回调函数给出
-     */
-    private var dealAudio = false
 
     /**
      * 音轨通道- AudioFormat.CHANNEL_OUT_MONO、AudioFormat.CHANNEL_OUT_STEREO ...
@@ -147,12 +134,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
         private var dealPcm = false
 
         /**
-         * 是否自行处理解码的数据,用于重编码
-         * true 音频解码产生的数据将通过回调函数给出,需自行控制播放
-         */
-        private var dealAudio = false
-
-        /**
          * 是否循环
          * true 音频将会进行循环解码,直到主动停止
          */
@@ -184,10 +165,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
             return this
         }
 
-        fun setDealAudio(dealAudio: Boolean): Builder {
-            this.dealAudio = dealAudio
-            return this
-        }
 
         fun setLoop(loop: Boolean): Builder {
             this.loop = loop
@@ -217,7 +194,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
             player.generate(
                 autoPlay,
                 dealPcm,
-                dealAudio,
                 loop,
                 progressFreq,
                 path,
@@ -239,7 +215,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
             player.generate(
                 autoPlay,
                 dealPcm,
-                dealAudio,
                 loop,
                 progressFreq,
                 fd,
@@ -254,7 +229,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
     private fun generate(
         autoPlay: Boolean,
         dealPcm: Boolean,
-        dealAudio: Boolean,
         loop: Boolean,
         progressFreq: Long,
         path: String,
@@ -263,7 +237,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
     ) {
         this.autoPlay = autoPlay
         this.dealPcm = dealPcm
-        this.dealAudio = dealAudio
         this.loop = loop
         this.progressFreq = progressFreq
         this.listener = listener
@@ -281,7 +254,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
     private fun generate(
         autoPlay: Boolean,
         dealPcm: Boolean,
-        dealAudio: Boolean,
         loop: Boolean,
         progressFreq: Long,
         fd: FileDescriptor,
@@ -291,7 +263,6 @@ class AudioDecoder private constructor() : BaseDecoder() {
     ) {
         this.autoPlay = autoPlay
         this.dealPcm = dealPcm
-        this.dealAudio = dealAudio
         this.loop = loop
         this.progressFreq = progressFreq
         this.listener = listener
@@ -370,12 +341,28 @@ class AudioDecoder private constructor() : BaseDecoder() {
                 AudioFormat.ENCODING_PCM_16BIT
             }
         }
+
+
         if (pcmBit == AudioFormat.ENCODING_INVALID) {
             pcmBit = AudioFormat.ENCODING_PCM_16BIT
         }
-        onAudioFormat()
+
         if (flag) {
-            Log.e("lee","音频信息:$sample,$pcmBit,$channel,duration:$duration")
+            Log.e("lee", "音频信息:$sample,$pcmBit,$channel,duration:$duration")
+
+            if(pcmBit==AudioFormat.ENCODING_PCM_16BIT){
+                Log.e("lee","16位")
+            }
+
+            if(channel==AudioFormat.CHANNEL_OUT_MONO){
+                Log.e("lee","单声道")
+            }else if(channel==AudioFormat.CHANNEL_OUT_STEREO){
+                Log.e("lee","双声道")
+            }
+
+
+
+            onAudioFormat()
             if (!dealPcm) {
                 track = AudioTR.AudioTrackBuilder()
                     .setAuto(true)
@@ -387,59 +374,43 @@ class AudioDecoder private constructor() : BaseDecoder() {
         }
     }
 
+
     override fun onRender(index: Int) {
         val buffer = codec?.getOutputBuffer(index) ?: return
-        if (dealAudio) {
-            //releaseOutputBuffer后buffer中的数据会被清除
-            //如果直接返回buffer的话会导致音频丢数据,要sleep才能解决丢数据问题,但这样一样就耗时了
-            val chunk = ByteArray(bufferInfo!!.size)
-            //获取数据
-            buffer.get(chunk)
-            buffer.clear()
-            //生成新的ByteBuffer
-            val b = ByteBuffer.wrap(chunk)
-            onDealAudio(b, bufferInfo!!)
-            codec?.releaseOutputBuffer(index, false)
-        } else {
-            //数据帧的时间值
-            val pts = bufferInfo!!.presentationTimeUs / 1000
-            val p = (pts * 100f / duration * 100).toInt() / 100f //保留2位小数
-            //进度回调
-            val ct = System.currentTimeMillis()
-            if (ct - lastPT >= progressFreq) {
-                //满足回调频率后进行回调
-                listener?.onAudioProgress(p)
-                lastPT = ct
-            }else if(p>=100f){
-                listener?.onAudioProgress(100f)
-            }
-
-            //记录开始节点
-            if (startTime == 0L || lastPts > pts && loop) {
-                startTime = System.currentTimeMillis()
-                Log.e("lee", "音频开始了")
-            }
-            //更新上一帧时间
-            lastPts = pts
-
-            //获取音频信息
-            val chunk = ByteArray(bufferInfo!!.size)
-            buffer.get(chunk)
-            buffer.clear()
-
-            if (dealPcm) {
-                //自行处理音频,通过回调给出
-                listener?.onAudioData(chunk)
-            } else {
-                //播放音频
-                track?.writeData(chunk, chunk.size)
-            }
-            codec?.releaseOutputBuffer(index, false)
+        //数据帧的时间值
+        val pts = bufferInfo!!.presentationTimeUs / 1000
+        val p = (pts * 100f / duration * 100).toInt() / 100f //保留2位小数
+        //进度回调
+        val ct = System.currentTimeMillis()
+        if (ct - lastPT >= progressFreq) {
+            //满足回调频率后进行回调
+            listener?.onAudioProgress(p)
+            lastPT = ct
+        } else if (p >= 100f) {
+            listener?.onAudioProgress(100f)
         }
-    }
 
-    private fun onDealAudio(buffer: ByteBuffer, bufferInfo: MediaCodec.BufferInfo) {
-        listener?.onDealAudio(buffer, bufferInfo)
+        //记录开始节点
+        if (startTime == 0L || lastPts > pts && loop) {
+            startTime = System.currentTimeMillis()
+            Log.e("lee", "音频开始了")
+        }
+        //更新上一帧时间
+        lastPts = pts
+
+        //获取音频信息
+        val chunk = ByteArray(bufferInfo!!.size)
+        buffer.get(chunk)
+        buffer.clear()
+
+        if (dealPcm) {
+            //自行处理音频,通过回调给出
+            listener?.onAudioData(chunk)
+        } else {
+            //播放音频
+            track?.writeData(chunk, chunk.size)
+        }
+        codec?.releaseOutputBuffer(index, false)
     }
 
     private fun onAudioFormat() {

@@ -2,24 +2,19 @@ package com.lee.video.lib.gl.egl
 
 import android.graphics.SurfaceTexture
 import android.opengl.*
-import android.util.Log
 import android.view.Surface
 
 /**
+ * egl处理,简化操作
  *@author lee
  *@date 2021/11/24
  */
 class EGLCore {
+    // EGL相关变量
     companion object {
         const val FLAG_RECORDABLE = 0x01
-
         const val EGL_RECORDABLE_ANDROID = 0x3142
     }
-
-
-    private val TAG = "EGLCore"
-
-    // EGL相关变量
     private var mEGLDisplay: EGLDisplay = EGL14.EGL_NO_DISPLAY
     private var mEGLContext = EGL14.EGL_NO_CONTEXT
     private var mEGLConfig: EGLConfig? = null
@@ -35,20 +30,20 @@ class EGLCore {
 
         val sharedContext = eglContext ?: EGL14.EGL_NO_CONTEXT
 
-        // 1，创建 EGLDisplay
+        //创建 EGLDisplay
         mEGLDisplay = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY)
         if (mEGLDisplay === EGL14.EGL_NO_DISPLAY) {
             throw RuntimeException("Unable to get EGL14 display")
         }
 
-        // 2，初始化 EGLDisplay
+        //初始化 EGLDisplay
         val version = IntArray(2)
         if (!EGL14.eglInitialize(mEGLDisplay, version, 0, version, 1)) {
             mEGLDisplay = EGL14.EGL_NO_DISPLAY
             throw RuntimeException("unable to initialize EGL14")
         }
 
-        // 3，初始化EGLConfig，EGLContext上下文
+        //初始化EGLConfig，EGLContext上下文
         if (mEGLContext === EGL14.EGL_NO_CONTEXT) {
             val config =
                 getConfig(flags, 2) ?: throw RuntimeException("Unable to find a suitable EGLConfig")
@@ -82,10 +77,8 @@ class EGLCore {
             EGL14.EGL_GREEN_SIZE, 8,
             EGL14.EGL_BLUE_SIZE, 8,
             EGL14.EGL_ALPHA_SIZE, 8,
-            //EGL14.EGL_DEPTH_SIZE, 16,
-            //EGL14.EGL_STENCIL_SIZE, 8,
             EGL14.EGL_RENDERABLE_TYPE, renderType,
-            EGL14.EGL_NONE, 0, // placeholder for recordable [@-3]
+            EGL14.EGL_NONE, 0,
             EGL14.EGL_NONE
         )
         //配置Android指定的标记
@@ -103,7 +96,6 @@ class EGLCore {
                 numConfigs, 0
             )
         ) {
-            Log.w(TAG, "Unable to find RGB8888 / $version EGLConfig")
             return null
         }
 
@@ -200,8 +192,6 @@ class EGLCore {
      */
     fun release() {
         if (mEGLDisplay !== EGL14.EGL_NO_DISPLAY) {
-            // Android is unusual in that it uses a reference-counted EGLDisplay.  So for
-            // every eglInitialize() we need an eglTerminate().
             EGL14.eglMakeCurrent(
                 mEGLDisplay, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE,
                 EGL14.EGL_NO_CONTEXT

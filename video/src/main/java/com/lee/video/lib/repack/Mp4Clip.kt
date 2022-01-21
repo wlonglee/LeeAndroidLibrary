@@ -1,13 +1,16 @@
 package com.lee.video.lib.repack
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.media.MediaCodec
 import android.media.MediaFormat
+import com.lee.video.R
 import com.lee.video.lib.codec.decoder.sync.AudioExtractor
 import com.lee.video.lib.codec.decoder.sync.EglVideo
 import com.lee.video.lib.codec.decoder.sync.VideoDecoderSync
 import com.lee.video.lib.codec.encoder.EncoderSyncListener
 import com.lee.video.lib.codec.encoder.VideoEncoder
+import com.lee.video.lib.gl.render.drawer.BitmapDrawer
 import com.lee.video.lib.gl.render.drawer.IDrawer
 import com.lee.video.lib.gl.render.drawer.VideoClipDrawer
 import java.lang.Exception
@@ -187,6 +190,7 @@ class Mp4Clip private constructor() {
     private lateinit var egl: EglVideo
 
     private lateinit var drawer: IDrawer
+    private lateinit var drawer2: IDrawer
 
     /**
      * 音频数据提取器
@@ -289,6 +293,10 @@ class Mp4Clip private constructor() {
                 marginLeft,
                 marginTop
             )
+            drawer2 = BitmapDrawer(
+                context,
+                BitmapFactory.decodeResource(context.resources, R.drawable.blur_1)
+            )
         } catch (e: Exception) {
             e.printStackTrace()
             this.listener?.onError(e.toString())
@@ -311,7 +319,7 @@ class Mp4Clip private constructor() {
         try {
             //创建EGL相关数据
             egl = EglVideo()
-            egl.create(videoEncoder.inputSurface, drawer, resultWidth, resultHeight)
+            egl.create(videoEncoder.inputSurface, drawer,drawer2, resultWidth, resultHeight)
             videoDecoder.configEgl(egl)
 
             //启动解码

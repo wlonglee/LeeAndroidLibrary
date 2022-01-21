@@ -1,12 +1,10 @@
 package com.lee.video.lib.gl.egl
 
 import android.opengl.GLES20
-import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
-import com.lee.video.lib.gl.egl.EGLCore.Companion.EGL_RECORDABLE_ANDROID
 import com.lee.video.lib.gl.render.drawer.IDrawer
 import java.lang.ref.WeakReference
 
@@ -246,7 +244,7 @@ class CustomGLRenderer : SurfaceHolder.Callback {
         //------------第4部分：EGL相关操作------------
         private fun initEGL() {
             eglSurfaceHolder = EGLSurfaceHolder()
-            eglSurfaceHolder?.init(null, EGL_RECORDABLE_ANDROID)
+            eglSurfaceHolder?.init()
         }
 
         private fun createEGLSurfaceFirst() {

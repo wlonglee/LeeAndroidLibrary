@@ -41,7 +41,7 @@ class VideoClipDrawer(context: Context,
     }
 
     override fun getFragmentShader(): Int {
-        return R.raw.fs_video_base
+        return R.raw.fs_video
     }
 
     override fun setSize(width: Int, height: Int) {

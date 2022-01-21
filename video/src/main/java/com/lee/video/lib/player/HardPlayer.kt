@@ -2,19 +2,19 @@ package com.lee.video.lib.player
 
 import android.content.Context
 import android.content.res.AssetFileDescriptor
-import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
-import android.view.Surface
-import android.view.SurfaceView
+import android.opengl.GLSurfaceView
+import android.util.Log
 import com.lee.video.lib.codec.base.BaseDecoder
 import com.lee.video.lib.codec.decoder.AudioDecoder
 import com.lee.video.lib.codec.decoder.VideoDecoder
-import com.lee.video.lib.gl.egl.CustomGLRenderer
+import com.lee.video.lib.gl.render.BaseSurfaceRender
 import com.lee.video.lib.gl.render.drawer.IDrawer
 import com.lee.video.lib.gl.render.drawer.VideoDrawer
+import com.lee.video.lib.gl.render.drawer.VideoDrawer2
+import com.lee.video.lib.gl.render.drawer.WaterMaskDrawer
 import java.io.FileDescriptor
-import java.nio.ByteBuffer
 import kotlin.math.max
 
 /**
@@ -49,13 +49,19 @@ class HardPlayer private constructor() {
      */
     private var context: Context? = null
 
-    private var surfaceView: SurfaceView? = null
-    private var surface: Surface? = null
-    private var videoW: Int=1
-    private var videoH: Int=1
+    private var surfaceView: GLSurfaceView? = null
 
-    private var render: CustomGLRenderer? = null
+    private var render: BaseSurfaceRender? = null
+
+    /**
+     * 绘制视频画面
+     */
     private var drawer: IDrawer? = null
+
+    /**
+     * 绘制水印
+     */
+    private var mask: IDrawer? = null
 
     /**
      * 监听器
@@ -116,7 +122,14 @@ class HardPlayer private constructor() {
         fun onReady()
 
         /**
-         * 播放进度
+         * 解码的音频数据,dealPcm为true时才会回调
+         *
+         * @param audioData 音频数据
+         */
+        fun onAudioData(audioData: ByteArray)
+
+        /**
+         * 播放进度0~100 保留2位小数
          */
         fun onProgress(p: Float)
 
@@ -125,17 +138,10 @@ class HardPlayer private constructor() {
          */
         fun onEnd()
 
+        /**
+         * 播放出错
+         */
         fun onError(msg: String)
-
-        fun onDealAudio(
-            buffer: ByteBuffer,
-            bufferInfo: MediaCodec.BufferInfo
-        )
-
-        fun onDealVideo(
-            buffer: ByteBuffer,
-            bufferInfo: MediaCodec.BufferInfo
-        )
     }
 
     class Builder {
@@ -177,29 +183,13 @@ class HardPlayer private constructor() {
          * false 使用内置的audioTrack进行音频的播放
          */
         private var dealPcm = false
-
-        /**
-         * 是否自行处理解码的数据,用于重编码
-         * true 音频解码产生的数据将通过回调函数给出,需自行控制播放
-         */
-        private var dealAudio = false
         //音频相关参数配置
 
         //视频相关参数配置
         private var context: Context? = null
 
-        private var surfaceView: SurfaceView? = null
+        private var surfaceView: GLSurfaceView? = null
 
-        private var surface: Surface? = null
-
-        private var videoW:Int=1
-        private var videoH:Int=1
-
-        /**
-         * 是否自行处理视频
-         * true-自行处理
-         */
-        private var dealVideo = false
         //视频相关参数配置
 
         /**
@@ -211,7 +201,6 @@ class HardPlayer private constructor() {
          * 播放相关监听回调
          */
         private var listener: PlayListener? = null
-
 
         fun setAutoPlay(autoPlay: Boolean): Builder {
             this.autoPlay = autoPlay
@@ -238,30 +227,14 @@ class HardPlayer private constructor() {
             return this
         }
 
-        fun setDealAudio(dealAudio: Boolean): Builder {
-            this.dealAudio = dealAudio
-            return this
-        }
-
-        fun setDealVideo(dealVideo: Boolean): Builder {
-            this.dealVideo = dealVideo
-            return this
-        }
 
         fun setContext(context: Context?): Builder {
             this.context = context
             return this
         }
 
-        fun setSurface(surface: SurfaceView?): Builder {
+        fun setSurface(surface: GLSurfaceView?): Builder {
             this.surfaceView = surface
-            return this
-        }
-
-        fun setSurface(surface: Surface?,videoW:Int,videoH:Int): Builder {
-            this.surface = surface
-            this.videoW=videoW
-            this.videoH=videoH
             return this
         }
 
@@ -285,8 +258,8 @@ class HardPlayer private constructor() {
             val player = HardPlayer()
             player.generate(
                 autoPlay, loop, decoderAudio, decoderVideo, progressFreq,
-                dealPcm, dealAudio,
-                context, dealVideo, surfaceView,surface,videoW,videoH,
+                dealPcm,
+                context, surfaceView,
                 interceptor, listener,
                 path = path
             )
@@ -301,8 +274,8 @@ class HardPlayer private constructor() {
             val player = HardPlayer()
             player.generate(
                 autoPlay, loop, decoderAudio, decoderVideo, progressFreq,
-                dealPcm, dealAudio,
-                context, dealVideo, surfaceView,surface,videoW,videoH,
+                dealPcm,
+                context, surfaceView,
                 interceptor, listener,
                 fd = fd, offset = offset, length = length
             )
@@ -318,13 +291,8 @@ class HardPlayer private constructor() {
         decoderVideo: Boolean,
         progressFreq: Long,
         dealPcm: Boolean,
-        dealAudio: Boolean,
         context: Context?,
-        dealVideo: Boolean,
-        surfaceView: SurfaceView?,
-        surface: Surface?,
-        videoW:Int,
-        videoH:Int,
+        surfaceView: GLSurfaceView?,
         interceptor: BaseDecoder.NetInterceptor?,
         listener: PlayListener?,
         path: String? = null,
@@ -355,9 +323,6 @@ class HardPlayer private constructor() {
         this.progressFreq = progressFreq
         this.context = context
         this.surfaceView = surfaceView
-        this.surface = surface
-        this.videoW = videoW
-        this.videoH = videoH
         this.interceptor = interceptor
         this.listener = listener
 
@@ -368,7 +333,6 @@ class HardPlayer private constructor() {
             endVideo = false
             initAudioEncoder(
                 dealPcm,
-                dealAudio,
                 loop,
                 progressFreq,
                 path,
@@ -377,7 +341,6 @@ class HardPlayer private constructor() {
                 length
             )
             initVideoEncoder(
-                dealVideo,
                 loop,
                 progressFreq,
                 path,
@@ -390,7 +353,6 @@ class HardPlayer private constructor() {
             endVideo = true
             initAudioEncoder(
                 dealPcm,
-                dealAudio,
                 loop,
                 progressFreq,
                 path,
@@ -402,7 +364,6 @@ class HardPlayer private constructor() {
             prepareAudio = true
             endAudio = true
             initVideoEncoder(
-                dealVideo,
                 loop,
                 progressFreq,
                 path,
@@ -444,7 +405,6 @@ class HardPlayer private constructor() {
 
     private fun initAudioEncoder(
         dealPcm: Boolean,
-        dealAudio: Boolean,
         loop: Boolean,
         progressFreq: Long,
         path: String? = null,
@@ -455,7 +415,6 @@ class HardPlayer private constructor() {
         val builder = AudioDecoder.Builder()
             .setLoop(loop)
             .setDealPcm(dealPcm)
-            .setDealAudio(dealAudio)
             .setProgressFreq(progressFreq)
             .setInterceptor(object : BaseDecoder.NetInterceptor {
                 override fun progressComparison(decoderProgress: Float): Boolean {
@@ -484,14 +443,7 @@ class HardPlayer private constructor() {
                 }
 
                 override fun onAudioData(audioData: ByteArray) {
-
-                }
-
-                override fun onDealAudio(
-                    buffer: ByteBuffer,
-                    bufferInfo: MediaCodec.BufferInfo
-                ) {
-                    listener?.onDealAudio(buffer, bufferInfo)
+                    listener?.onAudioData(audioData)
                 }
 
                 override fun onEnd() {
@@ -500,6 +452,7 @@ class HardPlayer private constructor() {
                 }
 
                 override fun onError(msg: String) {
+                    listener?.onError(msg)
                 }
             })
 
@@ -513,7 +466,6 @@ class HardPlayer private constructor() {
 
 
     private fun initVideoEncoder(
-        dealVideo: Boolean,
         loop: Boolean,
         progressFreq: Long,
         path: String? = null,
@@ -521,10 +473,9 @@ class HardPlayer private constructor() {
         offset: Long = 0,
         length: Long = 0
     ) {
-        drawer = VideoDrawer(context!!) {
+        drawer = VideoDrawer2(context!!) {
             val builder = VideoDecoder.Builder()
                 .setLoop(loop)
-                .setDealVideo(dealVideo)
                 .setProgressFreq(progressFreq)
                 .setSurface(it)
                 .setInterceptor(object : BaseDecoder.NetInterceptor {
@@ -548,14 +499,6 @@ class HardPlayer private constructor() {
                         prepareVideo = true
                         holdOn()
                     }
-
-                    override fun onDealVideo(
-                        buffer: ByteBuffer,
-                        bufferInfo: MediaCodec.BufferInfo
-                    ) {
-                        listener?.onDealVideo(buffer, bufferInfo)
-                    }
-
 
                     override fun onVideoProgress(p: Float) {
                         if (!audioLongish)
@@ -601,17 +544,32 @@ class HardPlayer private constructor() {
     }
 
 
-    fun prepare() {
+    fun prepare(mask: WaterMaskDrawer) {
         //加载
         audioDecoder?.prepare()
-        render = CustomGLRenderer()
+        render = BaseSurfaceRender()
         render?.addDrawer(drawer)
-        if(surfaceView!=null) {
-            render?.setSurface(surfaceView!!)
-        }else{
-            render?.setSurface(surface!!,videoW,videoH)
-        }
+
+        this.mask = mask
+
+        render?.addDrawer(mask)
+        surfaceView?.setEGLContextClientVersion(2)
+        surfaceView?.setRenderer(render)
+        surfaceView?.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+
+
     }
+
+    fun translateMask(dx: Float, dy: Float) {
+//        mask?.translate(dx, dy)
+//        drawer?.translate(dx, dy)
+    }
+
+    fun translate(dx: Float, dy: Float) {
+//        mask?.translate(dx, dy)
+        drawer?.translate(dx, dy)
+    }
+
 
     fun startPlay() {
         if (prepareAudio && prepareVideo) {
@@ -669,16 +627,4 @@ class HardPlayer private constructor() {
         }
         return false
     }
-
-    /**
-     * 移动视频画面
-     */
-    fun translate(dx: Float, dy: Float) {
-        drawer?.translate(dx, dy)
-    }
-
-    fun notifyTimeUs(timeUs:Long){
-        render?.notifySwap(timeUs)
-    }
-
 }

@@ -12,7 +12,8 @@ import com.lee.video.lib.gl.ShaderUtil
  *@author lee
  *@date 2021/12/7
  */
-class GaussianDrawer(context: Context?, var bitmap: Bitmap,var bitmapW:Int,var bitmapH: Int) :BaseDrawer(context){
+class GaussianDrawer(context: Context?, var bitmap: Bitmap, var bitmapW: Int, var bitmapH: Int) :
+    BaseDrawer(context) {
     /**
      * 纹理索引
      */
@@ -28,7 +29,7 @@ class GaussianDrawer(context: Context?, var bitmap: Bitmap,var bitmapW:Int,var b
     /**
      * 模糊进度  范围0~1
      */
-    var size = 1f
+    var size = 0f
 
     /**
      * 模糊范围
@@ -68,6 +69,7 @@ class GaussianDrawer(context: Context?, var bitmap: Bitmap,var bitmapW:Int,var b
         sizeId = ShaderUtil.getUniform(glProgram, "size")
         ShaderUtil.generateFrameBufferObject(frameBuffer, frameTexture, bitmapW, bitmapH, fboSize)
     }
+
     override fun useCustomRender(): Boolean {
         return true
     }
@@ -101,7 +103,7 @@ class GaussianDrawer(context: Context?, var bitmap: Bitmap,var bitmapW:Int,var b
         }
 
         //将最终的结果渲染显示
-        ShaderUtil.clearScreen()
+        ShaderUtil.cleanScreen()
         ShaderUtil.useGL(glProgram, position, positionBuffer, coordinate, coordinateBuffer)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, frameTexture[fboSize - 1])
         ShaderUtil.setUniform1f(sizeId, size * blurSize)

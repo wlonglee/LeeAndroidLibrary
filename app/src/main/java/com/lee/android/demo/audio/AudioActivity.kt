@@ -4,9 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.lee.android.R
-import com.lee.audio.lib.FileSaveUtil
-import com.lee.audio.lib.audio.AudioMixer
-import com.lee.audio.lib.audio.AudioUtil
+import com.lee.video.lib.FileRW
+import com.lee.video.lib.audio.AudioMixer
+import com.lee.video.lib.audio.AudioUtil
 
 class AudioActivity : AppCompatActivity() {
 
@@ -14,11 +14,11 @@ class AudioActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val drum = FileSaveUtil("drum", "")
+        val drum = FileRW.ReadBuilder().setFileName("drum").build()
 
-        val metronome = FileSaveUtil("metronome", "")
+        val metronome = FileRW.ReadBuilder().setFileName("metronome").build()
 
-        val mix = FileSaveUtil("saveExtremeFinal", "", true)
+        val mix = FileRW.WriteBuilder().setFileName("saveExtremeFinal").setReplace(true).build()
 
         val mixer = AudioMixer.createExtremeMixer()
 

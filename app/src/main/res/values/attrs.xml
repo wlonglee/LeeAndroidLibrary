@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--自定义字体名称-->
+    <declare-styleable name="fontTextView">
+        <attr name="customFont">
+            <enum name="PingFangSCSemibold" value="0" />
+            <enum name="HelveticaNowDisplayBold" value="1" />
+            <enum name="HelveticaNowDisplay" value="2" />
+            <enum name="PingFangSCRegular" value="3" />
+            <enum name="HelveticaNowDisplayBlack" value="4" />
+        </attr>
+    </declare-styleable>
+
+    <!--圆环-->
+    <declare-styleable name="gradientCircle">
+        <!--圆环宽度-->
+        <attr name="circleStroke" format="dimension" />
+        <!--圆环与圆环间距-->
+        <attr name="circleSpace" format="dimension" />
+        <!--圆环总数量-->
+        <attr name="circleMax" format="integer" />
+
+        <!--第一个圆环的半径-->
+        <attr name="firstRadius" format="dimension" />
+
+        <!--有色圆环色值-->
+        <attr name="startColor" format="color" />
+        <attr name="endColor" format="color" />
+
+        <!--默认圆环色值-->
+        <attr name="defColorStart" format="color" />
+        <attr name="defColorEnd" format="color" />
+    </declare-styleable>
+
+
+    <!--龙骨属性-->
+    <declare-styleable name="emptyKeel">
+        <!--圆角角度-->
+        <attr name="keelRadio" format="dimension" />
+        <!--颜色-->
+        <attr name="keelColor" format="color" />
+    </declare-styleable>
+
+    <!--圆环进度属性-->
+    <declare-styleable name="circleProgressView">
+        <!--圆环宽度-->
+        <attr name="strokeWidth" format="dimension" />
+        <!--圆环半径-->
+        <attr name="radius" format="dimension" />
+        <!--圆环进度颜色-->
+        <attr name="circleColor" format="color" />
+        <!--圆环底色-->
+        <attr name="ringColor" format="color" />
+    </declare-styleable>
+</resources>

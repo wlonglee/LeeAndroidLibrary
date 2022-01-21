@@ -45,9 +45,6 @@ abstract class BaseDecoder {
         //暂停
         PAUSE,
 
-        //跳转
-        SEEK,
-
         //停止
         STOP
     }
@@ -57,12 +54,6 @@ abstract class BaseDecoder {
      * true-资源加载后将自动解码
      */
     protected var autoPlay = false
-
-    /**
-     * 是否自行处理视频画面
-     */
-    protected var dealVideo = false
-
 
     /**
      * 是否循环
@@ -181,12 +172,6 @@ abstract class BaseDecoder {
                     break
                 }
 
-                //跳转状态
-//                if (playStatus == State.SEEK) {
-//                    extractor!!.seekTo(seekPos, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
-//                    playStatus = State.PLAY
-//                }
-
                 //获取输入索引
                 val index = codec!!.dequeueInputBuffer((1000 * 16).toLong())
                 if (index < 0) {
@@ -291,11 +276,6 @@ abstract class BaseDecoder {
         }
     }
 
-//    open fun genBuffer(): MediaCodec.BufferInfo {
-//        bufferInfo=MediaCodec.BufferInfo()
-//        return bufferInfo!!
-//    }
-
     @Throws(InterruptedException::class)
     fun sleep(millis: Long) {
         Thread.sleep(millis)
@@ -356,24 +336,6 @@ abstract class BaseDecoder {
             }
         }
     }
-
-
-//    /**
-//     * 跳转播放
-//     *
-//     * @param p 跳转进度 0~1
-//     */
-//    fun seek(p: Float) {
-//        var p = p
-//        if (playStatus == State.SEEK) return
-//        //限定跳转进度
-//        p = Math.max(p, 0f)
-//        p = Math.min(p, 1f)
-//
-//        //跳转的值需要是微秒,所以最后需乘1000
-//        seekPos = (duration * p * 1000).toLong()
-//        playStatus = State.SEEK
-//    }
 
     /**
      * 暂停播放
