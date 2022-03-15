@@ -39,7 +39,7 @@ abstract class BaseDrawer(var context: Context?) : IDrawer {
     /**
      * 矩阵对象指针
      */
-    private var matrixP: Int = 0
+    protected var matrixP: Int = 0
 
     /**
      * 矩阵--缩放、位移

@@ -1,6 +1,7 @@
 package com.lee.video.lib.gl.render
 
 import android.opengl.GLSurfaceView
+import android.util.Log
 import com.lee.video.lib.gl.ShaderUtil
 import com.lee.video.lib.gl.render.drawer.IDrawer
 import javax.microedition.khronos.egl.EGLConfig

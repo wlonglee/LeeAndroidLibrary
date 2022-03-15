@@ -351,13 +351,13 @@ class AudioDecoder private constructor() : BaseDecoder() {
             Log.e("lee", "音频信息:$sample,$pcmBit,$channel,duration:$duration")
 
             if(pcmBit==AudioFormat.ENCODING_PCM_16BIT){
-                Log.e("lee","16位")
+//                Log.e("lee","16位")
             }
 
             if(channel==AudioFormat.CHANNEL_OUT_MONO){
-                Log.e("lee","单声道")
+//                Log.e("lee","单声道")
             }else if(channel==AudioFormat.CHANNEL_OUT_STEREO){
-                Log.e("lee","双声道")
+//                Log.e("lee","双声道")
             }
 
 
@@ -393,7 +393,7 @@ class AudioDecoder private constructor() : BaseDecoder() {
         //记录开始节点
         if (startTime == 0L || lastPts > pts && loop) {
             startTime = System.currentTimeMillis()
-            Log.e("lee", "音频开始了")
+//            Log.e("lee", "音频开始了")
         }
         //更新上一帧时间
         lastPts = pts

@@ -1,16 +1,16 @@
 package com.lee.android
 
-import android.graphics.*
-import android.media.MediaCodecList
-import android.media.MediaExtractor
-import android.media.MediaFormat
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.os.Environment
 import android.text.TextPaint
 import android.util.Log
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
-import com.lee.video.lib.gl.render.drawer.*
+import com.lee.video.lib.gl.render.drawer.WaterMaskDrawer
 import com.lee.video.lib.player.HardPlayer
 import com.lee.video.lib.repack.Mp4Clip
 import kotlinx.android.synthetic.main.activity_test2.*
@@ -35,7 +35,7 @@ class TestActivity2 : AppCompatActivity() {
             MotionEvent.ACTION_MOVE -> {
                 val moveX = event.x - startX
                 val moveY = event.y - startY
-                player?.translate(moveX, moveY)
+//                player?.translate(moveX, moveY)
                 startX = event.x
                 startY = event.y
             }
@@ -53,6 +53,8 @@ class TestActivity2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test2)
+
+        //设置渲染的图片,该函数同时可以更新图片
 
 //        val supportVideoType = arrayListOf<String>()
 //        val c = MediaCodecList.getCodecCount()
@@ -85,7 +87,7 @@ class TestActivity2 : AppCompatActivity() {
 //        extractor.release()
 
 //        testClip()
-        testPlay()
+//        testPlay()
 
 
 //        val render = CustomGLRenderer()
@@ -150,7 +152,7 @@ class TestActivity2 : AppCompatActivity() {
     }
 
     private fun testPlay() {
-        val path = Environment.getExternalStorageDirectory().absolutePath + "/Pictures/1.mp3"
+        val path = Environment.getExternalStorageDirectory().absolutePath + "/Pictures/4.mp4"
         player = HardPlayer.Builder()
             .setAutoPlay(true)
             .setContext(this)
@@ -265,5 +267,6 @@ class TestActivity2 : AppCompatActivity() {
         canvas.drawText(text, 0f, abs(fontMetrics.ascent), textPaint)
         return bitmap
     }
+
 
 }

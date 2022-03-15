@@ -473,7 +473,7 @@ class HardPlayer private constructor() {
         offset: Long = 0,
         length: Long = 0
     ) {
-        drawer = VideoDrawer2(context!!) {
+        drawer = VideoDrawer(context!!) {
             val builder = VideoDecoder.Builder()
                 .setLoop(loop)
                 .setProgressFreq(progressFreq)
@@ -566,8 +566,8 @@ class HardPlayer private constructor() {
     }
 
     fun translate(dx: Float, dy: Float) {
-//        mask?.translate(dx, dy)
-        drawer?.translate(dx, dy)
+        mask?.translate(dx, dy)
+//        drawer?.translate(dx, dy)
     }
 
 

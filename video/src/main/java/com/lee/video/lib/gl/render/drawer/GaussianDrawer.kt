@@ -12,7 +12,7 @@ import com.lee.video.lib.gl.ShaderUtil
  *@author lee
  *@date 2021/12/7
  */
-class GaussianDrawer(context: Context?, var bitmap: Bitmap, var bitmapW: Int, var bitmapH: Int) :
+class GaussianDrawer(context: Context?, var bitmap: Bitmap, var bitmapW: Int=512, var bitmapH: Int=512) :
     BaseDrawer(context) {
     /**
      * 纹理索引
@@ -86,6 +86,8 @@ class GaussianDrawer(context: Context?, var bitmap: Bitmap, var bitmapW: Int, va
         //首次渲染 将图片渲染到FBO
         ShaderUtil.renderFrameBufferBegin(frameBuffer[0])
         ShaderUtil.useGL(glProgram, position, positionBuffer, coordinate, coordinateBuffer)
+        ShaderUtil.setWord(offsetX, offsetY, worldWidth, worldHeight)
+        ShaderUtil.setUniformMatrix4f(matrixP, matrix)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
         ShaderUtil.setUniform1f(sizeId, size * blurSize)
         ShaderUtil.drawGL(position, coordinate)
@@ -96,6 +98,8 @@ class GaussianDrawer(context: Context?, var bitmap: Bitmap, var bitmapW: Int, va
         for (i in 1 until fboSize) {
             ShaderUtil.renderFrameBufferBegin(frameBuffer[i])
             ShaderUtil.useGL(glProgram, position, positionBuffer, coordinate, coordinateBuffer)
+            ShaderUtil.setWord(offsetX, offsetY, worldWidth, worldHeight)
+            ShaderUtil.setUniformMatrix4f(matrixP, matrix)
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, frameTexture[i - 1])
             ShaderUtil.setUniform1f(sizeId, size * blurSize * (i + 0.2f))
             ShaderUtil.drawGL(position, coordinate)
@@ -105,22 +109,23 @@ class GaussianDrawer(context: Context?, var bitmap: Bitmap, var bitmapW: Int, va
         //将最终的结果渲染显示
         ShaderUtil.cleanScreen()
         ShaderUtil.useGL(glProgram, position, positionBuffer, coordinate, coordinateBuffer)
+        ShaderUtil.setWord(offsetX, offsetY, worldWidth, worldHeight)
+        ShaderUtil.setUniformMatrix4f(matrixP, matrix)
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, frameTexture[fboSize - 1])
+        //将最终的结果渲染显示
         ShaderUtil.setUniform1f(sizeId, size * blurSize)
         ShaderUtil.drawGL(position, coordinate)
 
-        //解绑纹理
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+
     }
 
-    override fun setSize(width: Int, height: Int) {
+    fun updateBitmap(bitmap: Bitmap) {
+        this.bitmap = bitmap
+        change = true
     }
 
-    override fun translate(dx: Float, dy: Float) {
+    override fun release() {
+        super.release()
+        ShaderUtil.unBindTexture(0)
     }
-
-    override fun getSurface(): SurfaceTexture? {
-        return null
-    }
-
 }

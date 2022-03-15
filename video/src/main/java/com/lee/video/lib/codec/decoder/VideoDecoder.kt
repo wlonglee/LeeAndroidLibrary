@@ -333,7 +333,7 @@ class VideoDecoder private constructor() : BaseDecoder() {
         //记录开始节点
         if (startTime == 0L || lastPts > pts && loop) {
             startTime = System.currentTimeMillis()
-            Log.e("lee", "视频开始了")
+//            Log.e("lee", "视频开始了")
         }
         //更新上一帧时间
         lastPts = pts
@@ -354,7 +354,7 @@ class VideoDecoder private constructor() : BaseDecoder() {
         } else if (s > fps) {
             //超时,直接丢弃
             render = false
-            Log.e("lee","超时,直接丢弃")
+//            Log.e("lee","超时,直接丢弃")
         }
         codec?.releaseOutputBuffer(index, render)
     }

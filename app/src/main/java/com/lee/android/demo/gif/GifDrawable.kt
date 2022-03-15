@@ -12,6 +12,13 @@ import java.io.InputStream
  *@date 2021/5/24
  */
 class GifDrawable : Drawable() {
+
+    public interface OnBitmapChange{
+        fun onChange(bitmap: Bitmap?)
+    }
+
+    public var listener:OnBitmapChange?=null
+
     /**
      * 默认画笔
      */
@@ -199,6 +206,10 @@ class GifDrawable : Drawable() {
         currentFrame = gifDecoder.currentFrameIndex
         //记录图片
         currentBitmap = gifDecoder.nextFrame
+
+
+
+        listener?.onChange(getRoundBitmap(currentBitmap!!))
 
         currentBitmap?.let {
             //记录帧数据

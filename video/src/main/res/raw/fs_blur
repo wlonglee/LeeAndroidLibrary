@@ -29,7 +29,7 @@ vec4 blur(vec2 uv,vec2 offset){
 
 void main() {
     //高斯模糊
-    vec2 offset =vec2(1./960.,1./640.)*size;
+    vec2 offset =vec2(1./272.,1./360.)*size;
 
     vec2 uv=texturePos;
 
