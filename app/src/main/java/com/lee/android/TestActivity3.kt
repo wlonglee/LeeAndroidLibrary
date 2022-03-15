@@ -59,6 +59,12 @@ class TestActivity3 : AppCompatActivity() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        gifDrawable?.stopAnim()
+        gifDrawable?.clear()
+    }
+
     private var isPause=false
 
     fun pauseGif(view: View) {

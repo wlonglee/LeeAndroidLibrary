@@ -264,4 +264,8 @@ class GifDrawable : Drawable() {
         invalidateSelf()
     }
 
+    fun clear(){
+        //清除数据
+        gifDecoder.clear()
+    }
 }
