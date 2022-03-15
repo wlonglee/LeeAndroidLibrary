@@ -3,7 +3,6 @@ package com.lee.android
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
@@ -63,7 +62,6 @@ class TestActivity3 : AppCompatActivity() {
     private var isPause=false
 
     fun pauseGif(view: View) {
-        Log.e("lee","点击")
         if(isPause){
             gifDrawable?.startAnim()
         }else{
