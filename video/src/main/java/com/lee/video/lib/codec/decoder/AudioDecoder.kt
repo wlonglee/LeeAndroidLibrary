@@ -6,7 +6,6 @@ import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
 import android.os.Build
-import android.util.Log
 import com.lee.video.lib.audio.AudioTR
 import com.lee.video.lib.audio.AudioUtil
 import com.lee.video.lib.codec.base.BaseDecoder
@@ -19,7 +18,6 @@ import java.io.IOException
  *@date 2021/11/25
  */
 class AudioDecoder private constructor() : BaseDecoder() {
-
     interface AudioListener {
         /**
          * 音轨参数回调
@@ -115,6 +113,10 @@ class AudioDecoder private constructor() : BaseDecoder() {
      */
     private var listener: AudioListener? = null
 
+    /**
+     * 解码的音频文件路径
+     */
+    var path: String? = null
 
     /**
      * 构建器
@@ -241,6 +243,7 @@ class AudioDecoder private constructor() : BaseDecoder() {
         this.progressFreq = progressFreq
         this.listener = listener
         this.interceptor = interceptor
+        this.path = path
 
         extractor = MediaExtractor()
         playStatus = State.NO_PLAY
@@ -348,20 +351,7 @@ class AudioDecoder private constructor() : BaseDecoder() {
         }
 
         if (flag) {
-            Log.e("lee", "音频信息:$sample,$pcmBit,$channel,duration:$duration")
-
-            if(pcmBit==AudioFormat.ENCODING_PCM_16BIT){
-//                Log.e("lee","16位")
-            }
-
-            if(channel==AudioFormat.CHANNEL_OUT_MONO){
-//                Log.e("lee","单声道")
-            }else if(channel==AudioFormat.CHANNEL_OUT_STEREO){
-//                Log.e("lee","双声道")
-            }
-
-
-
+            log("音频信息:$sample,$pcmBit,$channel,duration:$duration")
             onAudioFormat()
             if (!dealPcm) {
                 track = AudioTR.AudioTrackBuilder()

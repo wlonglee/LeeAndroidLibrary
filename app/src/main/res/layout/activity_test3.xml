@@ -8,23 +8,31 @@
 
     <SurfaceView
         android:id="@+id/gaussianView"
-        android:layout_alignParentEnd="true"
         android:layout_width="272px"
-        android:layout_height="360px"/>
+        android:layout_height="360px"
+        android:layout_alignParentEnd="true" />
 
-   <View
-       android:id="@+id/gifView"
-       android:layout_width="272px"
-       android:layout_height="360px"/>
+    <View
+        android:id="@+id/gifView"
+        android:layout_width="272px"
+        android:layout_height="360px" />
 
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/testBtn"
+        android:layout_width="360px"
+        android:layout_height="360px"
+        app:lottie_autoPlay="true"
+        app:lottie_fileName="arrow.json"
+        app:lottie_loop="true" />
 
 
     <TextView
-        android:layout_centerInParent="true"
-        android:text="暂停或者继续"
-        android:onClick="pauseGif"
         android:layout_width="272px"
-        android:layout_height="360px"/>
+        android:layout_height="360px"
+        android:layout_centerInParent="true"
+        android:onClick="pauseGif"
+        android:text="暂停或者继续" />
 
     <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/seekBar"

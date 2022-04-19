@@ -3,6 +3,7 @@ package com.lee.video.lib.codec.base
 import android.media.MediaCodec
 import android.media.MediaExtractor
 import android.media.MediaFormat
+import android.util.Log
 import java.util.concurrent.Executors
 
 /**
@@ -12,6 +13,13 @@ import java.util.concurrent.Executors
  *@date 2021/11/25
  */
 abstract class BaseDecoder {
+    var showLog = true
+
+    fun log(msg: String) {
+        if (showLog) {
+            Log.e("lee", msg)
+        }
+    }
 
     /**
      * 网络进度对比拦截
@@ -47,6 +55,20 @@ abstract class BaseDecoder {
 
         //停止
         STOP
+    }
+
+    /**
+     * 跳转状态
+     */
+    enum class SeekState {
+        //正在朝前跳转
+        SEEK_BEFORE,
+
+        //正在朝后跳转
+        SEEK_AFTER,
+
+        //正常播放
+        SEEK_NONE
     }
 
     /**
@@ -93,6 +115,25 @@ abstract class BaseDecoder {
     @Volatile
     protected var playStatus = State.NO_PLAY
 
+    /**
+     * 跳转标志
+     */
+    @Volatile
+    protected var seekStatus = SeekState.SEEK_NONE
+
+    /**
+     * 记录上一帧的pts,朝前跳转时,由于缓存帧的存在，只要当前帧小于上一帧，则认为跳转到前边了
+     */
+    @Volatile
+    protected var lastPts: Long = 0
+
+    /**
+     * 朝后跳转时到达的pts,只要当前帧大于该帧，则认为跳到后边了
+     */
+    @Volatile
+    private var goPts: Long = 0
+
+    protected var needSeek = false
 
     /**
      * 网络资源暂停标志
@@ -128,11 +169,6 @@ abstract class BaseDecoder {
     protected var lastPT: Long = 0
 
     /**
-     * 上一帧的渲染时间戳
-     */
-    protected var lastPts: Long = 0
-
-    /**
      * 线程池,执行解码与渲染任务
      */
     private val pool = Executors.newScheduledThreadPool(2)
@@ -154,6 +190,9 @@ abstract class BaseDecoder {
                 while (playStatus == State.PAUSE) {
                     //暂停中,进行休眠
                     sleep(16)
+                    if (needSeek) {
+                        dealSeek()
+                    }
                 }
 
                 //有网络加载的情况下,判断是否需要进入暂停
@@ -171,6 +210,7 @@ abstract class BaseDecoder {
                 if (playStatus == State.STOP) {
                     break
                 }
+
 
                 //获取输入索引
                 val index = codec!!.dequeueInputBuffer((1000 * 16).toLong())
@@ -232,6 +272,19 @@ abstract class BaseDecoder {
         }
     }
 
+    private fun dealSeek() {
+        val current = extractor!!.sampleTime
+        //跳转单位是微秒
+        extractor?.seekTo(goPts * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+        val go = extractor!!.sampleTime
+        val goBefore = go < current
+        seekStatus = if (goBefore) SeekState.SEEK_BEFORE
+        else SeekState.SEEK_AFTER
+        playStatus = State.PLAY
+        log("dealSeek:${seekStatus.name}")
+        needSeek = false
+    }
+
     /**
      * 渲染线程,获取解码好的数据执行播放操作
      * 不用mediaCodeC异步的方式是因为在某些特定机型上异步的无法release,会出现anr,瑞芯微给出的理由是底层代码未适配
@@ -257,7 +310,7 @@ abstract class BaseDecoder {
                 //获取索引
                 val index = codec!!.dequeueOutputBuffer(bufferInfo!!, (1000 * 16).toLong())
                 if (index >= 0) {
-                    onRender(index)
+                    render(index, bufferInfo!!.presentationTimeUs/1000)
                 } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     //参数发生了变化
                     format = codec!!.outputFormat
@@ -274,6 +327,37 @@ abstract class BaseDecoder {
             e.printStackTrace()
             onError("render err:$e")
         }
+    }
+
+    private fun render(index: Int, pts: Long) {
+        when (seekStatus) {
+            SeekState.SEEK_BEFORE -> {
+                log("SEEK_BEFORE:$pts----$lastPts")
+                if (pts <= lastPts) {
+                    seekStatus = SeekState.SEEK_NONE
+                    onRender(index)
+                } else {
+                    abandonIndex(index)
+                }
+            }
+            SeekState.SEEK_AFTER -> {
+                log("SEEK_AFTER:$pts----$goPts")
+                if (pts >= goPts) {
+                    seekStatus = SeekState.SEEK_NONE
+                    onRender(index)
+                } else {
+                    abandonIndex(index)
+                }
+            }
+            else -> {
+                onRender(index)
+            }
+        }
+
+    }
+
+    private fun abandonIndex(index: Int) {
+        codec?.releaseOutputBuffer(index, false)
     }
 
     @Throws(InterruptedException::class)
@@ -365,6 +449,23 @@ abstract class BaseDecoder {
         } else if (playStatus == State.PAUSE) {
             playStatus = State.PLAY
         }
+    }
+
+    /**
+     * 跳转到指定进度，0~1
+     */
+    fun seek(p: Float) {
+        seek((duration * p).toLong())
+    }
+
+    /**
+     * 跳转到指定时间，毫秒值
+     */
+    fun seek(pos: Long) {
+        log("seek:$pos")
+        goPts = pos
+        needSeek = true
+        playStatus = State.PAUSE
     }
 
     /**

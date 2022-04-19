@@ -9,7 +9,9 @@ import android.os.Environment
 import android.text.TextPaint
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.lee.video.lib.codec.decoder.AudioDecoder
 import com.lee.video.lib.gl.render.drawer.WaterMaskDrawer
 import com.lee.video.lib.player.HardPlayer
 import com.lee.video.lib.repack.Mp4Clip
@@ -25,6 +27,9 @@ class TestActivity2 : AppCompatActivity() {
 
 
     var player: HardPlayer? = null
+
+
+    var audioPlayer:AudioDecoder?=null
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
@@ -53,6 +58,8 @@ class TestActivity2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test2)
+
+        Log.e("lee","onCreate")
 
         //设置渲染的图片,该函数同时可以更新图片
 
@@ -151,43 +158,45 @@ class TestActivity2 : AppCompatActivity() {
 
     }
 
-    private fun testPlay() {
-        val path = Environment.getExternalStorageDirectory().absolutePath + "/Pictures/4.mp4"
-        player = HardPlayer.Builder()
-            .setAutoPlay(true)
-            .setContext(this)
-            .setLoop(true)
-            .setSurface(surfaceView)
-            .setListener(object : HardPlayer.PlayListener {
-                override fun onReady() {
-                }
-
-                override fun onAudioData(audioData: ByteArray) {
-
-                }
-
-                override fun onProgress(p: Float) {
-                }
-
-                override fun onEnd() {
-                }
-
-                override fun onError(msg: String) {
-                }
-
-            })
-            .build(path)
-
-
-//        val bitmap=BitmapFactory.decodeResource(resources, R.drawable.b)
-        val bitmap = generateBitmap("我是水印", 30, Color.RED)
-        //添加一个水印
-        val mask = WaterMaskDrawer(this, bitmap)
-        //设定默认偏移量
-        mask.setOffset(480, 320)
-        //设定显示大小
-        mask.onWordSize(bitmap.width, bitmap.height)
-        player?.prepare(mask)
+    fun testPlay(v:View) {
+        val path = Environment.getExternalStorageDirectory().absolutePath + "/Pictures/4.mp3"
+        audioPlayer=AudioDecoder.Builder().setAutoPlay(true).build(path)
+        audioPlayer?.prepare()
+//        player = HardPlayer.Builder()
+//            .setAutoPlay(true)
+//            .setContext(this)
+//            .setLoop(true)
+//            .setSurface(surfaceView)
+//            .setListener(object : HardPlayer.PlayListener {
+//                override fun onReady() {
+//                }
+//
+//                override fun onAudioData(audioData: ByteArray) {
+//
+//                }
+//
+//                override fun onProgress(p: Float) {
+//                }
+//
+//                override fun onEnd() {
+//                }
+//
+//                override fun onError(msg: String) {
+//                }
+//
+//            })
+//            .build(path)
+//
+//
+////        val bitmap=BitmapFactory.decodeResource(resources, R.drawable.b)
+//        val bitmap = generateBitmap("我是水印", 30, Color.RED)
+//        //添加一个水印
+//        val mask = WaterMaskDrawer(this, bitmap)
+//        //设定默认偏移量
+//        mask.setOffset(480, 320)
+//        //设定显示大小
+//        mask.onWordSize(bitmap.width, bitmap.height)
+//        player?.prepare(mask)
 //        drawer2.scale(0.5f,0.5f)
 
 //        drawer2 = VideoDrawer(this) {
@@ -210,6 +219,10 @@ class TestActivity2 : AppCompatActivity() {
 //                .build(path2)
 //            video2.prepare()
 //        }
+    }
+
+    fun testSeek(v:View){
+        audioPlayer?.seek(0.5f)
     }
 
 

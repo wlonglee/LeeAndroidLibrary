@@ -13,22 +13,22 @@ import kotlinx.android.synthetic.main.activity_test3.*
 
 
 class TestActivity3 : AppCompatActivity() {
-    var gifDrawable: GifDrawable? = null
+//    var gifDrawable: GifDrawable? = null
     var drawer: GaussianDrawer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_test3)
-        gifDrawable = GifDrawable()
-        gifDrawable?.setGifResource(assets.open("gif_2.gif"))
-        gifDrawable?.listener = object : GifDrawable.OnBitmapChange {
-            override fun onChange(bitmap: Bitmap?) {
-                drawer?.updateBitmap(bitmap!!)
-            }
-
-        }
-        gifView.background=gifDrawable
-        gifDrawable?.startAnim()
+//        gifDrawable = GifDrawable()
+//        gifDrawable?.setGifResource(assets.open("gif_2.gif"))
+//        gifDrawable?.listener = object : GifDrawable.OnBitmapChange {
+//            override fun onChange(bitmap: Bitmap?) {
+//                drawer?.updateBitmap(bitmap!!)
+//            }
+//
+//        }
+//        gifView.background=gifDrawable
+//        gifDrawable?.startAnim()
 
 
         drawer = GaussianDrawer(
@@ -61,18 +61,18 @@ class TestActivity3 : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        gifDrawable?.stopAnim()
-        gifDrawable?.clear()
+//        gifDrawable?.stopAnim()
+//        gifDrawable?.clear()
     }
 
     private var isPause=false
 
     fun pauseGif(view: View) {
-        if(isPause){
-            gifDrawable?.startAnim()
-        }else{
-            gifDrawable?.stopAnim()
-        }
+//        if(isPause){
+//            gifDrawable?.startAnim()
+//        }else{
+//            gifDrawable?.stopAnim()
+//        }
         isPause=!isPause
     }
 

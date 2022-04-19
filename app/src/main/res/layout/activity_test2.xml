@@ -14,14 +14,27 @@
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="invisible"/>
 
     <TextView
         android:id="@+id/repack"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:text="开始播放"
         android:gravity="center"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        android:onClick="testPlay"/>
+
+    <TextView
+        android:id="@+id/seek"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:text="随机跳转"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:onClick="testSeek"/>
 
     <!--        <com.airbnb.lottie.LottieAnimationView-->
     <!--            android:id="@+id/testBtn"-->
