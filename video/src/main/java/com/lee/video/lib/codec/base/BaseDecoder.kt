@@ -476,4 +476,8 @@ abstract class BaseDecoder {
             playStatus = State.STOP
         }
     }
+
+    fun getCurrentPlayStatus():State{
+        return playStatus
+    }
 }
