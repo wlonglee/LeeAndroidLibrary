@@ -442,7 +442,7 @@ class HardPlayer private constructor() {
                         dealPlayProgress(p)
                 }
 
-                override fun onAudioData(audioData: ByteArray) {
+                override fun onAudioData(audioData: ByteArray,p: Float) {
                     listener?.onAudioData(audioData)
                 }
 
