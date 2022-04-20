@@ -43,8 +43,9 @@ class AudioDecoder private constructor() : BaseDecoder() {
          * 解码的音频数据,dealPcm为true时才会回调
          *
          * @param audioData 音频数据
+         * @param p 该帧音频的进度值 0~100,保留两位小数,用于自行处理音频时记录该帧数据的进度
          */
-        fun onAudioData(audioData: ByteArray)
+        fun onAudioData(audioData: ByteArray, p: Float)
 
         /**
          * 播放器停止,资源也已释放,如果再次使用需要重新构建对象
@@ -71,7 +72,7 @@ class AudioDecoder private constructor() : BaseDecoder() {
         override fun onAudioProgress(p: Float) {
         }
 
-        override fun onAudioData(audioData: ByteArray) {
+        override fun onAudioData(audioData: ByteArray, p: Float) {
         }
 
         override fun onEnd() {
@@ -395,7 +396,7 @@ class AudioDecoder private constructor() : BaseDecoder() {
 
         if (dealPcm) {
             //自行处理音频,通过回调给出
-            listener?.onAudioData(chunk)
+            listener?.onAudioData(chunk, p.coerceAtMost(100f))
         } else {
             //播放音频
             track?.writeData(chunk, chunk.size)
