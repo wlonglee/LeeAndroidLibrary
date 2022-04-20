@@ -208,6 +208,7 @@ abstract class BaseDecoder {
 
                 //停止指令
                 if (playStatus == State.STOP) {
+                    log("解码停止")
                     break
                 }
 
@@ -304,13 +305,14 @@ abstract class BaseDecoder {
 
                 //停止指令
                 if (playStatus == State.STOP) {
+                    log("渲染停止")
                     break
                 }
 
                 //获取索引
                 val index = codec!!.dequeueOutputBuffer(bufferInfo!!, (1000 * 16).toLong())
                 if (index >= 0) {
-                    render(index, bufferInfo!!.presentationTimeUs/1000)
+                    render(index, bufferInfo!!.presentationTimeUs / 1000)
                 } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     //参数发生了变化
                     format = codec!!.outputFormat
@@ -323,7 +325,7 @@ abstract class BaseDecoder {
             }
             ros = true
             goEnd()
-        } catch (e: java.lang.Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             onError("render err:$e")
         }
@@ -367,6 +369,7 @@ abstract class BaseDecoder {
 
     private fun goEnd() {
         if (dos && ros) {
+            log("播放停止")
             //停止解码器,释放资源
             codec?.stop()
             codec?.release()
@@ -409,6 +412,7 @@ abstract class BaseDecoder {
      * 启动播放
      */
     fun startPlay() {
+        log("启动播放:${playStatus.name}")
         if (playStatus == State.NO_PLAY) {
             if (codec != null) {
                 //启动解码器
@@ -425,6 +429,7 @@ abstract class BaseDecoder {
      * 暂停播放
      */
     fun pause() {
+        log("暂停播放:${playStatus.name}")
         if (playStatus == State.PLAY) {
             playStatus = State.PAUSE
         }
@@ -434,6 +439,7 @@ abstract class BaseDecoder {
      * 恢复播放
      */
     fun restore() {
+        log("恢复播放:${playStatus.name}")
         if (playStatus == State.PAUSE) {
             playStatus = State.PLAY
         }
@@ -472,12 +478,13 @@ abstract class BaseDecoder {
      * 停止播放
      */
     fun stop() {
+        log("停止播放:${playStatus.name}")
         if (playStatus != State.NO_PLAY) {
             playStatus = State.STOP
         }
     }
 
-    fun getCurrentPlayStatus():State{
+    fun getCurrentPlayStatus(): State {
         return playStatus
     }
 }
