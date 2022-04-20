@@ -44,8 +44,15 @@ class AudioDecoder private constructor() : BaseDecoder() {
          *
          * @param audioData 音频数据
          * @param p 该帧音频的进度值 0~100,保留两位小数,用于自行处理音频时记录该帧数据的进度
+         * @return 是否进入等待状态,false不进入  true 进入
          */
-        fun onAudioData(audioData: ByteArray, p: Float)
+        fun onAudioData(audioData: ByteArray, p: Float): Boolean = false
+
+        /**
+         * onAudioData返回true的情况下才会回调该函数
+         * @return true结束等待  false 继续等待
+         */
+        fun onDataWaitEnd(): Boolean = true
 
         /**
          * 播放器停止,资源也已释放,如果再次使用需要重新构建对象
@@ -72,7 +79,12 @@ class AudioDecoder private constructor() : BaseDecoder() {
         override fun onAudioProgress(p: Float) {
         }
 
-        override fun onAudioData(audioData: ByteArray, p: Float) {
+        override fun onAudioData(audioData: ByteArray, p: Float): Boolean {
+            return super.onAudioData(audioData, p)
+        }
+
+        override fun onDataWaitEnd(): Boolean {
+            return super.onDataWaitEnd()
         }
 
         override fun onEnd() {
@@ -365,6 +377,14 @@ class AudioDecoder private constructor() : BaseDecoder() {
         }
     }
 
+    override fun onDataWait() {
+        listener?.onDataWaitEnd()?.let {
+            if (it) {
+                playStatus = State.PLAY
+            }
+        }
+    }
+
 
     override fun onRender(index: Int) {
         val buffer = codec?.getOutputBuffer(index) ?: return
@@ -396,7 +416,11 @@ class AudioDecoder private constructor() : BaseDecoder() {
 
         if (dealPcm) {
             //自行处理音频,通过回调给出
-            listener?.onAudioData(chunk, p.coerceAtMost(100f))
+            listener?.onAudioData(chunk, p.coerceAtMost(100f))?.let {
+                if (it) {
+                    playStatus = State.DATA_WAIT
+                }
+            }
         } else {
             //播放音频
             track?.writeData(chunk, chunk.size)

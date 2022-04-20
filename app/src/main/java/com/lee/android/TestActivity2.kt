@@ -222,7 +222,8 @@ class TestActivity2 : AppCompatActivity() {
     }
 
     fun testSeek(v:View){
-        audioPlayer?.seek(0.5f)
+//        audioPlayer?.seek(0.5f)
+        audioPlayer?.stop()
     }
 
 

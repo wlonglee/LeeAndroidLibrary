@@ -315,6 +315,9 @@ class VideoDecoder private constructor() : BaseDecoder() {
         }
     }
 
+    override fun onDataWait() {
+    }
+
     override fun onRender(index: Int) {
         codec?.getOutputBuffer(index) ?: return
         //数据帧的时间值

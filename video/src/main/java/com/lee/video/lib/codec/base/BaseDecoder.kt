@@ -53,6 +53,9 @@ abstract class BaseDecoder {
         //暂停
         PAUSE,
 
+        //单独处理数据时,进入暂停状态
+        DATA_WAIT,
+
         //停止
         STOP
     }
@@ -195,6 +198,12 @@ abstract class BaseDecoder {
                     }
                 }
 
+                while (playStatus == State.DATA_WAIT) {
+                    //暂停中,进行休眠
+                    sleep(16)
+                    onDataWait()
+                }
+
                 //有网络加载的情况下,判断是否需要进入暂停
                 if (interceptor != null) {
                     netPause = interceptor!!.progressComparison(decoderProgress)
@@ -298,6 +307,12 @@ abstract class BaseDecoder {
                     //暂停中,进行休眠
                     sleep(16)
                 }
+
+                while (playStatus == State.DATA_WAIT) {
+                    //暂停中,进行休眠
+                    sleep(16)
+                }
+
                 while (netPause) {
                     //网络加载暂停中,进行休眠
                     sleep(90)
@@ -397,6 +412,11 @@ abstract class BaseDecoder {
      * 渲染数据
      */
     abstract fun onRender(index: Int)
+
+    /**
+     * 自行渲染数据进入等待状态后触发该回调
+     */
+    abstract fun onDataWait()
 
     /**
      * 错误信息
