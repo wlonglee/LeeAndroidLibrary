@@ -1,3 +1,4 @@
 include ':video'
+include ':metronome'
 include ':app'
 rootProject.name = "LeeAndroidLibrary"

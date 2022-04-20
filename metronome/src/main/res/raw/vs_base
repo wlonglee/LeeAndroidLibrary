@@ -1,0 +1,9 @@
+attribute vec4 vPosition;
+attribute vec2 vCoordinate;
+varying vec2 texturePos;
+uniform mat4 uMatrix;
+void main() {
+    //gl_Position = vPosition*uMatrix; //后乘是Z轴翻转效果
+    gl_Position = uMatrix*vPosition;
+    texturePos = vCoordinate;
+}

@@ -23,7 +23,6 @@ class TestActivity3 : AppCompatActivity() {
 //        gifDrawable?.setGifResource(assets.open("gif_2.gif"))
 //        gifDrawable?.listener = object : GifDrawable.OnBitmapChange {
 //            override fun onChange(bitmap: Bitmap?) {
-//                drawer?.updateBitmap(bitmap!!)
 //            }
 //
 //        }
