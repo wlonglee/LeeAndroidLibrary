@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MetronomeIcon">
+        <attr name="needleBgColor" format="color" />
+        <attr name="needleColor" format="color" />
+    </declare-styleable>
+</resources>

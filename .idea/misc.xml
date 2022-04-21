@@ -3,8 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/WorkSpace/LeeAndroidLibrary/app/src/main/res/layout/activity_glbitmap.xml" value="0.19293478260869565" />
+        <entry key="..\:/WorkSpace/LeeAndroidLibrary/app/src/main/res/layout/activity_test.xml" value="0.19293478260869565" />
         <entry key="..\:/WorkSpace/LeeAndroidLibrary/app/src/main/res/layout/activity_test2.xml" value="0.15989583333333332" />
         <entry key="..\:/WorkSpace/LeeAndroidLibrary/app/src/main/res/layout/activity_test3.xml" value="0.1" />
+        <entry key="..\:/WorkSpace/LeeAndroidLibrary/metronome/src/main/res/drawable/ic_shape.xml" value="0.24" />
       </map>
     </option>
   </component>

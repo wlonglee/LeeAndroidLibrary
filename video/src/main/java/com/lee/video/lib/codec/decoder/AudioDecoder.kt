@@ -379,6 +379,8 @@ class AudioDecoder private constructor() : BaseDecoder() {
 
     override fun onDataWait() {
         listener?.onDataWaitEnd()?.let {
+            if(inSeek())
+                return@let
             if (it) {
                 playStatus = State.PLAY
             }
@@ -417,7 +419,9 @@ class AudioDecoder private constructor() : BaseDecoder() {
         if (dealPcm) {
             //自行处理音频,通过回调给出
             listener?.onAudioData(chunk, p.coerceAtMost(100f))?.let {
-                if (it && !inSeek()) {
+                if (inSeek())
+                    return@let
+                if (it) {
                     playStatus = State.DATA_WAIT
                 }
             }

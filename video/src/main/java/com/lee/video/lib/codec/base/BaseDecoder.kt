@@ -213,6 +213,7 @@ abstract class BaseDecoder {
                 }
 
                 if (playStatus == State.SEEK_START) {
+                    log("deal seek")
                     dealSeek()
                 }
 
@@ -503,13 +504,13 @@ abstract class BaseDecoder {
      * 跳转到指定时间，毫秒值
      */
     fun seek(pos: Long) {
-        if (playStatus == State.SEEK_START)
+        if (inSeek())
             return
-        log("expected seek:$pos")
         goPts = pos
         needSeek = true
         seekBeforeStatus = playStatus
         playStatus = State.SEEK_START
+        log("expected seek:$pos,${playStatus.name}")
     }
 
     /**
@@ -526,7 +527,7 @@ abstract class BaseDecoder {
         return playStatus
     }
 
-    protected fun inSeek():Boolean{
-        return seekStatus!=SeekState.SEEK_NONE
+    protected fun inSeek(): Boolean {
+        return seekStatus != SeekState.SEEK_NONE || playStatus == State.SEEK || playStatus == State.SEEK_START
     }
 }
