@@ -287,6 +287,7 @@ abstract class BaseDecoder {
         //跳转单位是微秒
         extractor?.seekTo(goPts * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
         val go = extractor!!.sampleTime
+        goPts = go / 1000
         val goBefore = go < current
         seekStatus = if (goBefore) SeekState.SEEK_BEFORE
         else SeekState.SEEK_AFTER
@@ -481,7 +482,8 @@ abstract class BaseDecoder {
      * 跳转到指定进度，0~1
      */
     fun seek(p: Float) {
-        seek((duration * p).toLong())
+        val progress= 0f.coerceAtLeast(1f.coerceAtMost(p))
+        seek((duration * progress).toLong())
     }
 
     /**
