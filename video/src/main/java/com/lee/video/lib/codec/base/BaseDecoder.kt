@@ -525,4 +525,8 @@ abstract class BaseDecoder {
     fun getCurrentPlayStatus(): State {
         return playStatus
     }
+
+    protected fun inSeek():Boolean{
+        return seekStatus!=SeekState.SEEK_NONE
+    }
 }

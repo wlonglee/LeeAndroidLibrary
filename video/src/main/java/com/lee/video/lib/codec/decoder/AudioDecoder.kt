@@ -417,7 +417,7 @@ class AudioDecoder private constructor() : BaseDecoder() {
         if (dealPcm) {
             //自行处理音频,通过回调给出
             listener?.onAudioData(chunk, p.coerceAtMost(100f))?.let {
-                if (it) {
+                if (it && !inSeek()) {
                     playStatus = State.DATA_WAIT
                 }
             }
