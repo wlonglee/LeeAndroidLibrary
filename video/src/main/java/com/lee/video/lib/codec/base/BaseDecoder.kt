@@ -53,6 +53,12 @@ abstract class BaseDecoder {
         //暂停
         PAUSE,
 
+        //进入跳转状态
+        SEEK_START,
+
+        //跳转中
+        SEEK,
+
         //单独处理数据时,进入暂停状态
         DATA_WAIT,
 
@@ -117,6 +123,11 @@ abstract class BaseDecoder {
      */
     @Volatile
     protected var playStatus = State.NO_PLAY
+
+    /**
+     * 记录跳转前的状态,跳转完成后,还原该状态
+     */
+    private var seekBeforeStatus = State.NO_PLAY
 
     /**
      * 跳转标志
@@ -193,15 +204,16 @@ abstract class BaseDecoder {
                 while (playStatus == State.PAUSE) {
                     //暂停中,进行休眠
                     sleep(16)
-                    if (needSeek) {
-                        dealSeek()
-                    }
                 }
 
                 while (playStatus == State.DATA_WAIT) {
                     //暂停中,进行休眠
                     sleep(16)
                     onDataWait()
+                }
+
+                if (playStatus == State.SEEK_START) {
+                    dealSeek()
                 }
 
                 //有网络加载的情况下,判断是否需要进入暂停
@@ -283,15 +295,16 @@ abstract class BaseDecoder {
     }
 
     private fun dealSeek() {
+        playStatus = State.SEEK
         val current = extractor!!.sampleTime
         //跳转单位是微秒
         extractor?.seekTo(goPts * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC)
         val go = extractor!!.sampleTime
         goPts = go / 1000
+        log("real seek:$goPts")
         val goBefore = go < current
         seekStatus = if (goBefore) SeekState.SEEK_BEFORE
         else SeekState.SEEK_AFTER
-        playStatus = State.PLAY
         log("dealSeek:${seekStatus.name}")
         needSeek = false
     }
@@ -353,19 +366,19 @@ abstract class BaseDecoder {
                 log("SEEK_BEFORE:$pts----$lastPts")
                 if (pts <= lastPts) {
                     seekStatus = SeekState.SEEK_NONE
-                    onRender(index)
-                } else {
-                    abandonIndex(index)
+                    playStatus = seekBeforeStatus
+                    log("seek before over")
                 }
+                abandonIndex(index)
             }
             SeekState.SEEK_AFTER -> {
                 log("SEEK_AFTER:$pts----$goPts")
                 if (pts >= goPts) {
                     seekStatus = SeekState.SEEK_NONE
-                    onRender(index)
-                } else {
-                    abandonIndex(index)
+                    playStatus = seekBeforeStatus
+                    log("seek after over")
                 }
+                abandonIndex(index)
             }
             else -> {
                 onRender(index)
@@ -482,7 +495,7 @@ abstract class BaseDecoder {
      * 跳转到指定进度，0~1
      */
     fun seek(p: Float) {
-        val progress= 0f.coerceAtLeast(1f.coerceAtMost(p))
+        val progress = 0f.coerceAtLeast(1f.coerceAtMost(p))
         seek((duration * progress).toLong())
     }
 
@@ -490,10 +503,13 @@ abstract class BaseDecoder {
      * 跳转到指定时间，毫秒值
      */
     fun seek(pos: Long) {
-        log("seek:$pos")
+        if (playStatus == State.SEEK_START)
+            return
+        log("expected seek:$pos")
         goPts = pos
         needSeek = true
-        playStatus = State.PAUSE
+        seekBeforeStatus = playStatus
+        playStatus = State.SEEK_START
     }
 
     /**
