@@ -379,7 +379,7 @@ class AudioDecoder private constructor() : BaseDecoder() {
 
     override fun onDataWait() {
         listener?.onDataWaitEnd()?.let {
-            if(inSeek())
+            if (inSeek())
                 return@let
             if (it) {
                 playStatus = State.PLAY
@@ -388,10 +388,9 @@ class AudioDecoder private constructor() : BaseDecoder() {
     }
 
 
-    override fun onRender(index: Int) {
+    override fun onRender(index: Int, pts: Long) {
         val buffer = codec?.getOutputBuffer(index) ?: return
         //数据帧的时间值
-        val pts = bufferInfo!!.presentationTimeUs / 1000
         val p = (pts * 100f / duration * 100).toInt() / 100f //保留2位小数
         //进度回调
         val ct = System.currentTimeMillis()

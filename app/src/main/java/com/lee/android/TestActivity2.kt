@@ -18,6 +18,7 @@ import com.lee.video.lib.repack.Mp4Clip
 import kotlinx.android.synthetic.main.activity_test2.*
 import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.random.Random
 
 
 class TestActivity2 : AppCompatActivity() {
@@ -222,8 +223,8 @@ class TestActivity2 : AppCompatActivity() {
     }
 
     fun testSeek(v:View){
-//        audioPlayer?.seek(0.5f)
-        audioPlayer?.stop()
+        audioPlayer?.seek(Random(System.currentTimeMillis()).nextFloat())
+//        audioPlayer?.stop()
     }
 
 

@@ -188,6 +188,16 @@ abstract class BaseDecoder {
     private val pool = Executors.newScheduledThreadPool(2)
 
     /**
+     * 在blueLava上,seek后获取解码好的数据,pts时间没有发生变化,使用该值自行存储数据时间
+     * 压入的时候存,取出的时候取,压入永远大于取出,
+     * 不使用队列的原因在于：使用ArrayList和Queue  多次跳转很容易出现poll取数据为null的情况
+     */
+    private val queuePts = LongArray(50)
+    private val queueSize = 50
+    private var inCount = 0
+    private var outCount = 0
+
+    /**
      * 资源播放开始的时间节点
      */
     protected var startTime = 0L
@@ -274,6 +284,11 @@ abstract class BaseDecoder {
                 } else {
                     //压入数据
                     val sampleTime = extractor!!.sampleTime
+                    queuePts[inCount] = sampleTime / 1000
+                    inCount++
+                    if (inCount == queueSize) {
+                        inCount = 0
+                    }
                     decoderProgress =
                         (sampleTime * 0.1f / duration * 100).toInt() / 100f //保留2位小数
                     codec!!.queueInputBuffer(
@@ -342,7 +357,11 @@ abstract class BaseDecoder {
                 //获取索引
                 val index = codec!!.dequeueOutputBuffer(bufferInfo!!, (1000 * 16).toLong())
                 if (index >= 0) {
-                    render(index, bufferInfo!!.presentationTimeUs / 1000)
+                    render(index, queuePts[outCount])
+                    outCount++
+                    if (outCount == queueSize) {
+                        outCount = 0
+                    }
                 } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
                     //参数发生了变化
                     format = codec!!.outputFormat
@@ -382,7 +401,7 @@ abstract class BaseDecoder {
                 abandonIndex(index)
             }
             else -> {
-                onRender(index)
+                onRender(index, pts)
             }
         }
 
@@ -426,7 +445,7 @@ abstract class BaseDecoder {
     /**
      * 渲染数据
      */
-    abstract fun onRender(index: Int)
+    abstract fun onRender(index: Int, pts: Long)
 
     /**
      * 自行渲染数据进入等待状态后触发该回调
