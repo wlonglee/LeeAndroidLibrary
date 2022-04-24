@@ -546,6 +546,10 @@ abstract class BaseDecoder {
         return playStatus
     }
 
+    protected fun inNoPlay():Boolean{
+        return playStatus==State.PAUSE || playStatus==State.STOP
+    }
+
     protected fun inSeek(): Boolean {
         return seekStatus != SeekState.SEEK_NONE || playStatus == State.SEEK || playStatus == State.SEEK_START
     }
