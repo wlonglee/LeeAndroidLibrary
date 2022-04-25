@@ -1,208 +1,396 @@
 package com.lee.metronome
 
-import android.util.Log
+import android.content.Context
+import android.media.AudioFormat
+import com.lee.metronome.model.MetronomeData
+import com.lee.metronome.model.MetronomeSoundData
 import com.lee.metronome.type.BeatType
-import com.lee.metronome.type.DotType
 import com.lee.metronome.type.NoteType
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.concurrent.Executors
 
 /**
- * 节拍器数据信息
  *@author lee
- *@date 2021/1/14
+ *@date 2022/4/22
  */
-class Metronome(
-    //设定的每分钟节拍数
-    var bpm: Int = 60,
-    //每个小节有多少拍
-    var molecule: Int = 4,
-    //以什么音符为一拍, 1/4 2/4表示4分音符一拍，每小节有1 2拍
-    var denominator: Int = 4,
-    //音符类型
-    var noteType: NoteType = NoteType.QUARTER
-) {
+class Metronome {
     /**
-     * 是否输出log信息
+     * 音频采样率
      */
-    var showLog = true
-
-    fun log(msg: String) {
-        if (showLog) {
-            Log.e("lee_metronome", msg)
-        }
-    }
+    private var sampleRate = 44100
 
     /**
-     * 小节内每个拍号的圆点规则
+     * pcm位数类型
      */
-    lateinit var dotArray: Array<DotType>
+    private var pcmBit = AudioFormat.ENCODING_PCM_16BIT
 
     /**
-     * 小节内每拍(包含子拍)数据对应的声音响动规则
+     * pcm位数
      */
-    lateinit var beatArray: Array<BeatType>
+    private var pcmNum = 16
 
     /**
-     * 计算出来的每拍(包含子拍)数据的字节长度
+     * 输出通道-单声道
      */
-    lateinit var bpmArray: IntArray
-
-    var beatSize = 0
-
-    init {
-        //计算界面显示的圆点规则
-        calculateDot()
-        //计算每次响动的声音
-        calculateBeat()
-    }
-
-    /**
-     * 计算界面显示的圆点规则
-     */
-    private fun calculateDot() {
-
-        //4分拍号  1/4 2/4 3/4 4/4
-        //8分拍号  3/8 6/8 9/8 12/8
-        dotArray = Array(molecule) { index ->
-            when (index) {
-                0 -> {
-                    DotType.STRONG_BIG
-                }
-                else -> {
-                    if (denominator == 4) {
-                        //4分音符的都是大拍
-                        DotType.BIG
-                    } else {
-                        //8分音符  3 6 9为大拍
-                        if (index % 3 == 0) {
-                            //3 6 9为大拍
-                            DotType.BIG
-                        } else {
-                            DotType.SMALL
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 计算每次响动的声音,每拍(无论多少子拍)时对应的圆点发亮,只亮一下-by产品
-     */
-    private fun calculateBeat() {
-        beatArray = Array(molecule * noteType.num) { index ->
-            when (index) {
-                0 -> {
-                    //第一个都是强拍音
-                    BeatType.DRIP
-                }
-                else -> {
-                    if (denominator == 4) {
-                        //4分音符剩下的都是弱拍
-                        BeatType.TICK
-                    } else {
-                        if (index % 3 == 0) {
-                            //3 6 9发次强声
-                            BeatType.DROP
-                        } else {
-                            if (noteType == NoteType.QUARTER_DOT) {
-                                BeatType.NONE
-                            } else {
-                                BeatType.TICK
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 计算一分钟内的每拍数据长度
-     */
-    fun calculateMetronome(sample: Int, pcmNum: Int) {
-        //bpm表示一分钟内响多少次, noteType.num表示响的这拍实际有几下
-        val realCount = bpm * noteType.num
-        calculateMetronome(sample, pcmNum, realCount)
-    }
-
-    /**
-     * 根据录制的小节数量,计算每拍的数据长度
-     */
-    fun calculateMetronome(sample: Int, pcmNum: Int, recordSection: Int) {
-        //recordSection表示录制的小节数量
-        //molecule表示每个小节有多少拍
-        val realCount = recordSection * molecule * noteType.num
-        //计算一分钟内的响动比值  例60bpm表示一分钟响60次  3/4拍 4小节 60bpm的,则一个循环只响12次,是一分钟的 1/5
-        val realMolecule = recordSection * molecule * 1f / bpm
-        calculateMetronome(sample, pcmNum, realCount, realMolecule)
-    }
+    private val channel = AudioFormat.CHANNEL_OUT_MONO
 
 
     /**
-     * 计算每一拍的数据信息
-     * @param sample 采样率 44100、48000
-     * @param pcmNum 8位传8 16位传16
-     * @param realCount 实际有多少个拍子
-     * @param realMolecule 默认下是1
+     * 设定的节拍信息
      */
-    private fun calculateMetronome(
-        sample: Int,
-        pcmNum: Int,
-        realCount: Int,
-        realMolecule: Float = 1f
+    var metronomeData: MetronomeData
+
+    /**
+     * 设定的声音信息
+     */
+    val soundData = MetronomeSoundData()
+
+    var listener: MetronomeListener? = null
+
+    /**
+     * 当节拍音频数据不参与混合运算时,由其播放音频
+     */
+    private var audioTrack: AudioTR? = null
+
+    private var audioTrackVolume = 1f
+
+    /**
+     * 线程池
+     */
+    private var pool = Executors.newScheduledThreadPool(1)
+
+    /**
+     * 节拍任务
+     */
+    private var metronomeTask: MetronomeTask? = null
+
+    /**
+     * 是否触发了更新节拍、拍号等操作
+     */
+    @Volatile
+    private var updateBpm = false
+
+    /**
+     * 读取raw目录下的滴答声
+     * @param drip 强拍
+     * @param drop 次强拍
+     * @param tick 弱拍
+     * @param bpm         每分钟的节拍
+     * @param molecule    每小节有几拍
+     * @param denominator 以几分音符为一拍
+     * @param noteType    音符类型
+     * @param recordSection 录制小节数量,根据录制单独生成对应的节拍数据
+     */
+    constructor(
+        context: Context,
+        drip: Int,
+        drop: Int,
+        tick: Int,
+        bpm: Int,
+        molecule: Int,
+        denominator: Int,
+        noteType: NoteType = NoteType.QUARTER,
+        recordSection: Int = -1,
+        listener: MetronomeListener?
     ) {
-        bpmArray = IntArray(realCount)
+        this.listener = listener
+        metronomeData = MetronomeData(bpm, molecule, denominator, noteType, recordSection)
+        metronomeData.calculateMetronome(sampleRate, pcmNum)
+        var file = File(context.cacheDir.absolutePath + "/drip.wav")
+        if (file.exists()) {
+            file.delete()
+        }
+        file = File(context.cacheDir.absolutePath + "/drop.wav")
+        if (file.exists()) {
+            file.delete()
+        }
+        file = File(context.cacheDir.absolutePath + "/tick.wav")
+        if (file.exists()) {
+            file.delete()
+        }
+        copyRaw(context, drip, "drip.wav")
+        copyRaw(context, drop, "drop.wav")
+        copyRaw(context, tick, "tick.wav")
+        updateAudioPath(
+            context.cacheDir.absolutePath + "/drip.wav",
+            context.cacheDir.absolutePath + "/drop.wav",
+            context.cacheDir.absolutePath + "/tick.wav"
+        )
+    }
 
-        //计算数据的总长度
-        // sample*pcmNum/8 表示一秒钟的数据大小  *60 表示一分钟的数据
-        var dataTotalSize = (sample * pcmNum / 8 * 60 * realMolecule).toInt()
+    /**
+     * 读取指定音频文件作为滴答声
+     *
+     * @param dripPath 强拍
+     * @param dropPath 次强拍
+     * @param tickPath 弱拍
+     * @param bpm         每分钟的节拍
+     * @param molecule    每小节有几拍
+     * @param denominator 以几分音符为一拍
+     * @param noteType    音符类型
+     * @param recordSection 录制小节数量,根据录制单独生成对应的节拍数据
+     */
+    constructor(
+        dripPath: String,
+        dropPath: String,
+        tickPath: String,
+        bpm: Int,
+        molecule: Int,
+        denominator: Int,
+        noteType: NoteType = NoteType.QUARTER,
+        recordSection: Int = -1,
+        listener: MetronomeListener?
+    ) {
+        this.listener = listener
+        metronomeData = MetronomeData(bpm, molecule, denominator, noteType, recordSection)
+        metronomeData.calculateMetronome(sampleRate, pcmNum)
+        updateAudioPath(dripPath, dropPath, tickPath)
+    }
 
-        //这两个音符,数据长度只有实际的1/3
-        if (noteType == NoteType.QUARTER_DOT || noteType == NoteType.QUAVER_TRIPLET) {
-            dataTotalSize /= 3
+
+    /**
+     * 更新节拍器参数
+     *
+     * @param bpm         每分钟的节拍
+     * @param molecule    每小节有几拍
+     * @param denominator 以几分音符为一拍
+     * @param noteType    音符类型
+     * @param recordSection 录制小节数量,根据录制单独生成对应的节拍数据
+     */
+    fun updateMetronome(
+        bpm: Int,
+        molecule: Int,
+        denominator: Int,
+        noteType: NoteType = NoteType.QUARTER,
+        recordSection: Int = -1
+    ) {
+        if (updateBpm)
+            return
+
+        updateBpm = true
+        metronomeData = MetronomeData(bpm, molecule, denominator, noteType, recordSection)
+        metronomeData.calculateMetronome(sampleRate, pcmNum)
+        if (isReady()) {
+            soundData.generateBeatData(metronomeData.beatSize)
+            soundData.generateNoneData()
         }
 
-        //保证总长度值为2的倍数
-        if (dataTotalSize % 2 != 0) {
-            dataTotalSize += 1
-        }
+        //没有启动任务的情况下,还原该配置
+        if (metronomeTask == null)
+            updateBpm = false
+        metronomeTask?.stopTask()
+    }
 
-        //计算每个拍子的长度
-        //数据长度原理:1000-60 -->20*16+40*17
-        //因为17为单数,音频数据需求偶数,需要进一步拆解  最终结果为  1000-60 -->40*16+20*18
-        var high = 0
-        var low: Int = dataTotalSize / realCount
 
-        if (low % 2 != 0) {
-            //保证low为2的整数倍
-            low -= 1
+    private fun copyRaw(context: Context, raw: Int, name: String) {
+        val inputStream = context.resources.openRawResource(raw)
+        var fos: FileOutputStream? = null
+        try {
+            val buffer = ByteArray(4096)
+            var length = inputStream.read(buffer)
+            fos = FileOutputStream(File(context.cacheDir.absolutePath + "/" + name))
+            while (length != -1) {
+                fos.write(buffer, 0, length)
+                length = inputStream.read(buffer)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try {
+                inputStream.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            try {
+                fos?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
-        if (low * realCount != dataTotalSize) {
-            //存在high high比low2
-            high = low + 2
-        }
+    }
 
-        //计算高位的数量,相当于求一元二次方程
-        // x+y=realCount
-        // x*low +y*high=dataTotalSize
-        // low+2=high
-        var y = 0
-        if (high != 0) {
-            y = (dataTotalSize - low * realCount) / (high - low)
-        }
-        val x = realCount - y
 
-        //给数组赋值
-        for (i in 0 until x) {
-            bpmArray[i] = low
-        }
-        for (i in 0 until y) {
-            bpmArray[x + i] = high
-        }
+    private fun updateAudioPath(dripPath: String, dropPath: String, tickPath: String) {
+        soundData.resetAllSrc()
+        val dripData = ArrayList<ByteArray>()
+        val dropData = ArrayList<ByteArray>()
+        val tickData = ArrayList<ByteArray>()
+        decoderAudio(dripPath, object : AudioDecoder.SampleListener() {
+            override fun onPrepare(sample: Int, pcm: Int, channels: Int) {
+                sampleRate = sample
+                pcmBit = pcm
+                when (pcmBit) {
+                    AudioFormat.ENCODING_PCM_8BIT -> pcmNum = 8
+                    AudioFormat.ENCODING_PCM_16BIT -> pcmNum = 16
+                }
+            }
 
-        //存储拍子的长度值,以大的为准
-        beatSize = low.coerceAtLeast(high)
+            override fun onAudioData(data: ByteArray) {
+                soundData.addTotalSize(BeatType.DRIP, data.size)
+                dripData.add(data)
+            }
 
-        log("info:$bpm,$molecule,$denominator,${noteType.name},realCount:$realCount,$x*$low+$y*$high,beat:$beatSize")
+            override fun onEnd() {
+                soundData.settingSrc(BeatType.DRIP, dripData)
+                calculateAudioReady()
+            }
+        })
+        decoderAudio(dropPath, object : AudioDecoder.SampleListener() {
+            override fun onAudioData(data: ByteArray) {
+                soundData.addTotalSize(BeatType.DROP, data.size)
+                dropData.add(data)
+            }
+
+            override fun onEnd() {
+                soundData.settingSrc(BeatType.DROP, dropData)
+                calculateAudioReady()
+            }
+        })
+        decoderAudio(tickPath, object : AudioDecoder.SampleListener() {
+            override fun onAudioData(data: ByteArray) {
+                soundData.addTotalSize(BeatType.TICK, data.size)
+                tickData.add(data)
+            }
+
+            override fun onEnd() {
+                soundData.settingSrc(BeatType.TICK, tickData)
+                calculateAudioReady()
+            }
+        })
+    }
+
+    private fun calculateAudioReady() {
+        if (isReady()) {
+            soundData.generateBeatData(metronomeData.beatSize)
+            soundData.generateNoneData()
+            //音频文件准备就绪
+            listener?.onReady()
+        }
+    }
+
+
+    private fun isReady(): Boolean {
+        return soundData.isSrcReady
+    }
+
+    /**
+     * 解码音频文件
+     */
+    private fun decoderAudio(path: String, listener: AudioDecoder.AudioListener) {
+        val file = File(path)
+        if (!file.exists()) {
+            throw RuntimeException("file not found:$path")
+        }
+        val audioDecoder = AudioDecoder()
+        audioDecoder.listener = listener
+        audioDecoder.setAudioPath(path)
+    }
+
+    /**
+     * 启动一个倒计数的节拍器
+     * @param countdown 倒计时多少个拍子
+     */
+    fun startMetronomeCountdown(
+        countdown: Int,
+        metronomeIcon: MetronomeIcon? = null,
+        listener: MetronomeCountdownListener? = null
+    ) {
+        audioTrack = AudioTR.AudioTrackBuilder()
+            .setChannel(channel)
+            .setSampleRate(sampleRate)
+            .setPcmEncodeBit(pcmBit)
+            .setAuto(true)
+            .build()
+        metronomeTask = MetronomeTask(metronomeData, soundData)
+        metronomeTask?.settingCountDown(countdown, object : MetronomeTask.CountdownListener {
+            override fun onCountdown(count: Int) {
+                listener?.onCountdown(count)
+            }
+
+            override fun onMetronomeData(
+                data: ByteArray,
+                size: Int,
+                index: Int,
+                moleculeIndex: Int,
+                progress: Float
+            ) {
+                if (index % 2 == 0)
+                    metronomeIcon?.updateProgress(progress / 100f)
+                else
+                    metronomeIcon?.updateProgress(1 - progress / 100f)
+                audioTrack?.writeData(data, size)
+            }
+
+            override fun onCountdownEnd() {
+                listener?.onCountdownEnd()
+                metronomeTask = null
+                audioTrack?.stopTrack()
+            }
+        })
+        pool.execute(metronomeTask)
+    }
+
+
+    /**
+     * 启动一个持续播放的节拍器
+     */
+    fun startMetronomeLoop(
+        metronomeIcon: MetronomeIcon? = null,
+        listener: MetronomeLoopListener? = null
+    ) {
+        audioTrack = AudioTR.AudioTrackBuilder()
+            .setChannel(channel)
+            .setSampleRate(sampleRate)
+            .setPcmEncodeBit(pcmBit)
+            .setAuto(true)
+            .build()
+        metronomeTask = MetronomeTask(metronomeData, soundData)
+        metronomeTask?.settingLoop(object : MetronomeTask.LoopListener {
+            override fun onMetronomeData(
+                data: ByteArray,
+                size: Int,
+                index: Int,
+                moleculeIndex: Int,
+                progress: Float
+            ) {
+                if (index % 2 == 0)
+                    metronomeIcon?.updateProgress(progress / 100f)
+                else
+                    metronomeIcon?.updateProgress(1 - progress / 100f)
+                audioTrack?.writeData(data, size)
+                listener?.onBeat(moleculeIndex)
+            }
+
+            override fun onLoopEnd() {
+                audioTrack?.stopTrack()
+
+                //触发了更新Bpm的操作
+                if (updateBpm) {
+                    startMetronomeLoop(metronomeIcon, listener)
+                } else {
+                    metronomeTask = null
+                    listener?.onLoopEnd()
+                }
+            }
+        })
+        pool.execute(metronomeTask)
+        updateBpm = false
+    }
+
+    /**
+     * 停止倒计时
+     */
+    fun stopMetronome() {
+        metronomeTask?.stopTask()
+    }
+
+    /**
+     * 更新节拍器的播放声音大小
+     */
+    fun updateVolume(volume: Float) {
+        audioTrackVolume = volume
+        audioTrack?.setVolume(audioTrackVolume)
     }
 }

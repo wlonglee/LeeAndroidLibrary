@@ -17,7 +17,7 @@ import kotlin.math.cos
  * @author ljq
  * @date 2021/4/19
  */
-class MetronomeIcon : RelativeLayout {
+open class MetronomeIcon : RelativeLayout {
     /**
      * 摆针控件
      */

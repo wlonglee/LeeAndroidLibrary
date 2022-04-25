@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!--顶部actionBar-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/px112">
+
+            <com.lee.metronome.MetronomeIcon
+                android:id="@+id/metronomeIcon"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/px24"
+                android:layout_width="@dimen/px64"
+                android:layout_height="@dimen/px64" />
+
+        </RelativeLayout>
+
+        <!--选项-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/px38"
+            android:layout_marginStart="@dimen/px40"
+            android:layout_marginTop="@dimen/px32"
+            android:layout_marginBottom="@dimen/px30">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="拍号"
+                android:textColor="#C5C5C9"
+                android:textSize="@dimen/px28" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/px304"
+                android:text="BPM"
+                android:textColor="#C5C5C9"
+                android:textSize="@dimen/px28" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="@dimen/px608"
+                android:text="拍子类型"
+                android:textColor="#C5C5C9"
+                android:textSize="@dimen/px28" />
+        </RelativeLayout>
+
+        <!--选项信息-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/px176"
+            android:layout_marginStart="@dimen/px40"
+            android:layout_marginEnd="@dimen/px40">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/bpmTimeSignature"
+                android:layout_width="@dimen/px272"
+                android:layout_height="@dimen/px176"
+                android:background="@drawable/bg_2094fa_40"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/px70"
+                tools:text="3/8" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/bpm"
+                android:layout_width="@dimen/px272"
+                android:layout_height="@dimen/px176"
+                android:layout_centerInParent="true"
+                android:background="@drawable/bg_212124_40"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/px70"
+                tools:text="95" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/bpmSection"
+                android:layout_width="@dimen/px272"
+                android:layout_height="@dimen/px176"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/bg_212124_40"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/px35"
+                tools:text="四分音符" />
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/px252"
+            android:layout_marginStart="@dimen/px40"
+            android:layout_marginEnd="@dimen/px40">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/bpmTimeRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/px120"
+                android:layout_centerVertical="true"
+                android:overScrollMode="never"
+                android:visibility="invisible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/bpmInfoRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/px120"
+                android:layout_centerVertical="true"
+                android:overScrollMode="never"
+                android:visibility="invisible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/bpmSectionRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/px120"
+                android:layout_centerVertical="true"
+                android:overScrollMode="never"
+                android:visibility="invisible" />
+        </RelativeLayout>
+
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
