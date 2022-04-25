@@ -109,10 +109,16 @@ class TestMetronomeActivity : AppCompatActivity() {
             4,
             NoteType.QUARTER,
             listener = MetronomeListener {
+
                 metronome?.startMetronomeLoop(
                     metronomeIcon,
                     listener = object : MetronomeLoopListener {
+                        override fun onLoopStart() {
+                            beatHot.setBeat(metronome?.getMetronomeDotType())
+                        }
+
                         override fun onBeat(index: Int) {
+                            beatHot.current=index
                         }
 
                         override fun onLoopEnd() {
@@ -124,6 +130,8 @@ class TestMetronomeActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        beatHot.setCount(4)
+
         val paint = Paint()
         paint.textSize = 50f
         paint.style = Paint.Style.FILL

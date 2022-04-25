@@ -16,6 +16,12 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/px112">
 
+            <com.lee.android.demo.metronome.BeatHot
+                android:id="@+id/beatHot"
+                android:layout_marginStart="@dimen/px24"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
             <com.lee.metronome.MetronomeIcon
                 android:id="@+id/metronomeIcon"
                 android:layout_centerVertical="true"
@@ -23,7 +29,6 @@
                 android:layout_marginEnd="@dimen/px24"
                 android:layout_width="@dimen/px64"
                 android:layout_height="@dimen/px64" />
-
         </RelativeLayout>
 
         <!--选项-->

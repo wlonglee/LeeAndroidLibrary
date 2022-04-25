@@ -65,6 +65,8 @@ internal class MetronomeTask(
     }
 
     interface LoopListener {
+        fun onLoopStart()
+
         /**
          * 每拍(包含子拍)的音频数据
          * @param data 该拍的音频数据
@@ -209,6 +211,7 @@ internal class MetronomeTask(
     private fun startLoop() {
         val molecule = metronomeData.molecule
         MetronomeLog.log("loop start")
+        loopListener?.onLoopStart()
 
         //记录小节内的索引,例如3/4,表示一个小节内有3个单拍
         var moleculeIndex = -1

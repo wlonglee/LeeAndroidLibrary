@@ -6,6 +6,8 @@ package com.lee.metronome
  *@date 2022/4/24
  */
 interface MetronomeLoopListener {
+    fun onLoopStart()
+
     /**
      * 在小节内索引,从0开始
      */

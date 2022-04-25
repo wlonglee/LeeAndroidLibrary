@@ -5,6 +5,7 @@ import android.media.AudioFormat
 import com.lee.metronome.model.MetronomeData
 import com.lee.metronome.model.MetronomeSoundData
 import com.lee.metronome.type.BeatType
+import com.lee.metronome.type.DotType
 import com.lee.metronome.type.NoteType
 import java.io.File
 import java.io.FileOutputStream
@@ -348,6 +349,10 @@ class Metronome {
             .build()
         metronomeTask = MetronomeTask(metronomeData, soundData)
         metronomeTask?.settingLoop(object : MetronomeTask.LoopListener {
+            override fun onLoopStart() {
+                listener?.onLoopStart()
+            }
+
             override fun onMetronomeData(
                 data: ByteArray,
                 size: Int,
@@ -392,5 +397,9 @@ class Metronome {
     fun updateVolume(volume: Float) {
         audioTrackVolume = volume
         audioTrack?.setVolume(audioTrackVolume)
+    }
+
+    fun getMetronomeDotType(): Array<DotType> {
+        return metronomeData.dotArray
     }
 }
