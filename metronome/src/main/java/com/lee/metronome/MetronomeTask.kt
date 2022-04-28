@@ -191,7 +191,7 @@ internal class MetronomeTask(
                     clipSize,
                     bpmIndex / noteNum,
                     moleculeIndex,
-                    p / noteNum + noteIndex * 100f / noteNum
+                    ((p / noteNum + noteIndex * 100f / noteNum)).toInt().toFloat()
                 )
             }
             noteIndex++
@@ -274,7 +274,7 @@ internal class MetronomeTask(
                     clipSize,
                     bpmIndex / noteNum,
                     moleculeIndex,
-                    p / noteNum + noteIndex * 100f / noteNum
+                    ((p / noteNum + noteIndex * 100f / noteNum)).toInt().toFloat()
                 )
             }
             noteIndex++

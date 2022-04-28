@@ -118,7 +118,7 @@ class TestMetronomeActivity : AppCompatActivity() {
                         }
 
                         override fun onBeat(index: Int) {
-                            beatHot.current=index
+                            beatHot.current = index
                         }
 
                         override fun onLoopEnd() {
@@ -275,5 +275,10 @@ class TestMetronomeActivity : AppCompatActivity() {
                 infoLocation3?.setVisibility(View.VISIBLE)
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        metronome?.stopMetronome()
     }
 }

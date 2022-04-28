@@ -24,11 +24,11 @@
 
             <com.lee.metronome.MetronomeIcon
                 android:id="@+id/metronomeIcon"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="@dimen/px24"
                 android:layout_width="@dimen/px64"
-                android:layout_height="@dimen/px64" />
+                android:layout_height="@dimen/px64"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="@dimen/px24" />
         </RelativeLayout>
 
         <!--选项-->

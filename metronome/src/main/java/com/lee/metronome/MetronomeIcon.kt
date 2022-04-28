@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -266,6 +267,10 @@ open class MetronomeIcon : RelativeLayout {
          * 从右到左 进度从1~0
          */
         fun updateProgress(p: Float) {
+            val degree = 45f - 90 * p
+            if (degree == currentDegree) {
+                return
+            }
             currentDegree = 45f - 90 * p
             postInvalidate()
         }
