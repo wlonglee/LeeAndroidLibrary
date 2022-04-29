@@ -139,7 +139,7 @@ class TestHttpActivity : AppCompatActivity() {
                 }
 
                 override fun onError(e: ApiError, tag: ApiTag?) {
-                    logE("城市信息onError")
+                    logE("城市信息onError$e")
                 }
 
                 override fun onCompleted(tag: ApiTag?) {
